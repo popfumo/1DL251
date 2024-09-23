@@ -1,5 +1,5 @@
 from board import Board, Player, Color, Location, Orientation
-from interaction_functions import place_piece, move_piece, unload_cell
+from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive
 from game_logic import check_win
 
 '''

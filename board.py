@@ -17,8 +17,9 @@ class Orientation(Enum):
 
 # Initializes a cell with a empty list of pieces
 class Cell:
-    def __init__(self):
+    def __init__(self, x, y):
         self.pieces = []
+        self.location = Location(x, y)
     def __repr__(self):
         return f"{self.pieces}"
     def get_top_piece(self):
@@ -39,6 +40,13 @@ class Location:
         self.y = y
     def __repr__(self):
         return f"{self.x}, {self.y}"
+
+    def __eq__(self, value):
+        return self.x == value.x and self.y == value.y
+    
+    def __ne__(self, value):
+        return self.x != value.x or self.y != value.y
+
 # Initializes a player with 0 pieces placed so far
 class Player:
     def __init__(self, color):
@@ -50,7 +58,7 @@ class Player:
 class Board:
     def __init__(self):
         # (0, 0) would be the top left
-        self.cells = [[Cell() for _ in range(5)] for _ in range(5)]
+        self.cells = [[Cell(row, col) for col in range(5)] for row in range(5)]
         # determine which whose turn is it, black goes first
         # todo: check whose turn it is
         self.turn = 0
@@ -67,6 +75,3 @@ class Piece:
         self.color = color
     def __repr__(self):
         return f"{self.location} {self.orientation}"
-
-
-

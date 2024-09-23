@@ -6,10 +6,17 @@ from board import Piece, Cell, Player, Board, Orientation
 def placeable(board, location):
     # Placeholder for now 
     curr_cell = board.get_cell(location)
-    #if (curr_cell.is_empty() == False):
-    if curr_cell.get_top_piece().orientation == Orientation.VERTICAL:
-        return False
+    if curr_cell.is_empty() == False:
+        if curr_cell.get_top_piece().orientation == Orientation.VERTICAL:
+            return False
     return True
+
+
+def are_adjacent(piece1, piece2):    
+    if isinstance(piece1, Piece) or isinstance(piece1, Cell):
+        return abs(piece1.location.x - piece2.x) + abs(piece1.location.y - piece2.y) == 1
+    else:
+        return abs(piece1.x - piece2.x) + abs(piece1.y - piece2.y) == 1
 
 def check_win(board, player):
     """
@@ -23,8 +30,6 @@ def check_win(board, player):
     Returns:
     bool: True if the player has won, False otherwise
     """
-    def are_adjacent(piece1, piece2):
-        return abs(piece1.location.x - piece2.location.x) + abs(piece1.location.y - piece2.location.y) == 1
 
     def find_connected_pieces(start_piece):
         connected = set([start_piece])
