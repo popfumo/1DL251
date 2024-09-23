@@ -8,15 +8,16 @@ num_pieces = 21
 # Places a piece in a cell, returns True if the piece was placed, False otherwise
 # piece is placed at the front of the array
 def place_piece(player, board, location, orientation):
-    if player.pieces_placed < num_pieces:
+    if player.pieces_placed < num_pieces:  # Use the constant NUM_PIECES instead of num_pieces
         if placeable(board, location):
-            new_piece = Piece(location, orientation, player)
+            new_piece = Piece(location, orientation, player)  # Use player.color instead of player
             player.pieces.insert(0, new_piece)
             player.pieces_placed += 1
             board.get_cell(location).pieces.insert(0, new_piece)
+            print(f"Piece placed at {location} with color {player.color}")  # Debug print
             return True
         else:
-            print("Cannot place piece")
+            print(f"Cannot place piece at {location}")
             return False
     else:    
         print("No more pieces left")
@@ -59,28 +60,39 @@ def unload_cell(player, board, old_location, new_locations):
     return False
 
 def unload_piece_recursive(player, board, num_remove, original_location, current_location):
-    if len(board.get_cell(new_location).pieces) == num_remove:
-        return False  # All pieces have been unloaded
+    if num_remove == 0:
+        return True  # All requested pieces have been unloaded
+
+    cell = board.get_cell(original_location)
+    if cell.is_empty():
+        print("No more pieces to unload.")
+        return False
+
+    top_piece = cell.get_top_piece()
+    if top_piece.color != player.color or top_piece.orientation == Orientation.VERTICAL:
+        print("Cannot unload this piece.")
+        return False
 
     directions = {"n": (-1, 0), "e": (0, 1), "s": (1, 0), "w": (0, -1)}
     
     while True:
-        direction = input("Choose direction to place piece (n/e/s/w): ").lower()
+        direction = input(f"Choose direction to place piece {num_remove} (n/e/s/w): ").lower()
         if direction in directions:
             dx, dy = directions[direction]
-            new_location = (current_location[0] + dx, current_location[1] + dy)
+            new_location = Location(current_location.x + dx, current_location.y + dy)
             
             if placeable(board, new_location):
-                current_piece = board.get_cell(original_location).remove_top_piece()
+                current_piece = cell.remove_top_piece()
                 board.get_cell(new_location).pieces.insert(0, current_piece)
                 print(f"Piece placed at {new_location}")
                 
                 # Recursively handle the next piece
-                return unload_piece_recursive(player, board, original_location, new_location)
+                return unload_piece_recursive(player, board, num_remove - 1, original_location, new_location)
             else:
                 print("Cannot place piece in that direction. Try again.")
         else:
             print("Invalid direction. Please choose n, e, s, or w.")
+
 
 # TODO: Decide who implements this function, AI team or Board team? 
 
