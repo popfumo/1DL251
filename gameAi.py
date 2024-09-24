@@ -1,5 +1,11 @@
+# Set the difficulty for the AI
 def setDifficulty():
-    pass
+    while True:
+        difficulty = input("Choose difficulty (easy, medium, hard): ").lower()
+        if difficulty in ['easy', 'medium', 'hard']:
+            return difficulty
+        else:
+            print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 def bestMove(board, validMoves):
     return 0
