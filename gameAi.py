@@ -1,3 +1,5 @@
+import random
+
 # Set the difficulty for the AI
 def setDifficulty():
     while True:
@@ -7,8 +9,24 @@ def setDifficulty():
         else:
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
-def bestMove(board, validMoves):
-    return 0
+# Function for AI to choose its move based on the difficulty
+def bestMove(board, validMoves, difficulty):
+    
+    if difficulty == "easy":
+        # Randomly select a move from the valid moves
+        return random.choice(validMoves)
+    
+    # TODO: return minimax function with depth 1
+    elif difficulty == "medium":
+        # Use Minimax with depth 1
+        #return bestMove(board, validMoves, depth=1)
+        pass
+    
+    # TODO: return minimax function with depth 1
+    elif difficulty == "hard":
+        # Use Minimax with depth 2
+        #return bestMove(board, validMoves, depth=2)
+        pass
 
 #returns a players/ais longest road
 def longestRoad(player, board):
