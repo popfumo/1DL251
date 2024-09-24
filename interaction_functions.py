@@ -60,17 +60,29 @@ def unload_cell(player, board, old_location, new_locations):
     return False
 
 def unload_piece_recursive(player, board, num_remove, original_location, current_location):
-    if num_remove == 0:
-        return True  # All requested pieces have been unloaded
-
+    print(f"Attempting to unload from location: {original_location}")
+    
     cell = board.get_cell(original_location)
+    print(f"Cell contents: {cell.pieces}")
+    
     if cell.is_empty():
-        print("No more pieces to unload.")
+        print("No pieces to unload: The cell is empty.")
         return False
 
     top_piece = cell.get_top_piece()
-    if top_piece.color != player.color or top_piece.orientation == Orientation.VERTICAL:
-        print("Cannot unload this piece.")
+    if top_piece is None:
+        print("Error: Cell is not empty but get_top_piece() returned None.")
+        return False
+
+    print(f"Top piece: Color - {top_piece.color}, Orientation - {top_piece.orientation}")
+    print(f"Current player color: {player.color}")
+
+    if top_piece.color != player.color:
+        print(f"Cannot unload this piece. Color mismatch: Piece color {top_piece.color}, Player color {player.color}")
+        return False
+    
+    if top_piece.orientation == Orientation.VERTICAL:
+        print("Cannot unload this piece. It's vertical.")
         return False
 
     directions = {"n": (-1, 0), "e": (0, 1), "s": (1, 0), "w": (0, -1)}
@@ -86,13 +98,14 @@ def unload_piece_recursive(player, board, num_remove, original_location, current
                 board.get_cell(new_location).pieces.insert(0, current_piece)
                 print(f"Piece placed at {new_location}")
                 
-                # Recursively handle the next piece
-                return unload_piece_recursive(player, board, num_remove - 1, original_location, new_location)
+                if num_remove > 1:
+                    return unload_piece_recursive(player, board, num_remove - 1, original_location, new_location)
+                else:
+                    return True
             else:
                 print("Cannot place piece in that direction. Try again.")
         else:
             print("Invalid direction. Please choose n, e, s, or w.")
-
 
 # TODO: Decide who implements this function, AI team or Board team? 
 
