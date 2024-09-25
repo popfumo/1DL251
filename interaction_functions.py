@@ -8,9 +8,9 @@ num_pieces = 21
 # Places a piece in a cell, returns True if the piece was placed, False otherwise
 # piece is placed at the front of the array
 def place_piece(player, board, location, orientation):
-    if player.pieces_placed < num_pieces:  # Use the constant NUM_PIECES instead of num_pieces
+    if player.pieces_placed < num_pieces: 
         if placeable(board, location):
-            new_piece = Piece(location, orientation, player)  # Use player.color instead of player
+            new_piece = Piece(location, orientation, player.color)  # Use player.color instead of player
             player.pieces.insert(0, new_piece)
             player.pieces_placed += 1
             board.get_cell(location).pieces.insert(0, new_piece)

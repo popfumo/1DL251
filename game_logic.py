@@ -21,28 +21,23 @@ def are_adjacent(loc1, loc2):
     else:
         raise TypeError("Both arguments must be Location objects")
 
-def check_win(board, player):
-    """
-    Check if the given player has won the game by finding a path of their pieces
-    from one side of the board to the opposite side.
-    
-    Args:
-    board (Board): The game board
-    player (Player): The player to check for a win
-    
-    Returns:
-    bool: True if the player has won, False otherwise
-    """
 
+
+def check_win(board, player):
     def find_connected_pieces(start_location):
-        connected = set([start_location])
+        connected = set()
         to_check = [start_location]
         
         while to_check:
             current_location = to_check.pop(0)
-            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
+            if current_location in connected:
+                continue
+            
+            connected.add(current_location)
+            
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 new_x, new_y = current_location.x + dx, current_location.y + dy
-                if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure we're within board boundaries
+                if 0 <= new_x < 5 and 0 <= new_y < 5:
                     new_location = Location(new_x, new_y)
                     cell = board.get_cell(new_location)
                     top_piece = cell.get_top_piece()
@@ -50,7 +45,6 @@ def check_win(board, player):
                         top_piece.color == player.color and 
                         top_piece.orientation == Orientation.HORIZONTAL and
                         new_location not in connected):
-                        connected.add(new_location)
                         to_check.append(new_location)
         
         return connected

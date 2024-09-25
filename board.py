@@ -41,11 +41,12 @@ class Location:
     def __repr__(self):
         return f"{self.x}, {self.y}"
 
-    def __eq__(self, value):
-        return self.x == value.x and self.y == value.y
+    def __eq__(self, other):
+        return isinstance(other, Location) and self.x == other.x and self.y == other.y
     
     def __ne__(self, value):
         return self.x != value.x or self.y != value.y
+
 
 # Initializes a player with 0 pieces placed so far
 class Player:
