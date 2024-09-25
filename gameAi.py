@@ -1,4 +1,5 @@
 import random
+from game_logic import find_connected_pieces, Location, Orientation
 
 # Set the difficulty for the AI
 def setDifficulty():
@@ -30,15 +31,25 @@ def bestMove(board, validMoves, difficulty):
 
 #returns a players/ais longest road
 def longestRoad(player, board):
-    return 0
+    longestRoad = 0
+    for row in range(5):
+        for col in range(5):
+            cell = board.get_cell(Location(row, col))
+            if not cell.is_empty():
+                top_piece = cell.get_top_piece()
+                if top_piece.color == player.color and top_piece.orientation == Orientation.HORIZONTAL:
+                    connected = find_connected_pieces(Location(row, col), board, player)
+                    if len(connected) > 0:
+                        longestRoad = len(connected)
+    return longestRoad
 
 #Number of adjecent squares where the player can extend their road
 def potentialRoadExtensions(board):
     return 0
 
 #count the number of flat stones
-def countFlatStones(board, player):
-    return 0
+def countFlatStones(player):
+    return player.pieces_placed
 
 #scoring criterias: 
 # Road Potential (RP): Evaluate the length of your longest road and potential extensions.
