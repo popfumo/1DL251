@@ -1,5 +1,6 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation
+from board import Player, Color
 
 # Set the difficulty for the AI
 def setDifficulty():
@@ -81,9 +82,33 @@ def edgeControl(player, board):
 # Flat Stone Differential (FSD): Calculate the difference in flat stones on the board between you and your opponent.
 # Center control, the amount of control of the center a player has
 # Edge control, the amount of edge pieces a player has, the more the better
+# TODO: Add BO criteria
 def score(board, player):
+    # Define the opponent (you can add an opponent parameter instead if needed)
+    opponent = Player(Color.WHITE if player.color == Color.BLACK else Color.BLACK)
+    
+    # Calculate each criterion for the player and opponent
+    player_longest_road = longestRoad(player, board)
+    # TODO: Calculate opponents longest road
+    
+    player_flat_stones = flatStoneDiff(player, opponent)
+    center_control = centerControl(player, board)
+    edge_control = edgeControl(player, board)
 
-    return 0
+    # Weights for each criterion (adjust these values as needed)
+    weight_longest_road = 5
+    weight_flat_stones = 2
+    weight_center_control = 3
+    weight_edge_control = 1
+
+    # Calculate the score for the player
+    player_score = (player_longest_road * weight_longest_road) + \
+                   (player_flat_stones * weight_flat_stones) + \
+                   (center_control * weight_center_control) + \
+                   (edge_control * weight_edge_control)
+
+    return player_score
+
 
 
 #Helper function, obtains a list of neighbors around a given square on the board
