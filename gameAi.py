@@ -81,4 +81,3 @@ def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):
     else:
         return min(miniMax(currDepth + 1, nodeIndex * 2, False, scores, targetDepth)
                    ,miniMax(currDepth + 1, nodeIndex * 2 + 1, False, scores, targetDepth))
-    pass
