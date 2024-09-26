@@ -51,6 +51,10 @@ def potentialRoadExtensions(board):
 def countFlatStones(player):
     return player.pieces_placed
 
+# Helper function for the score criteria (FSD)
+def flatStoneDiff(player, opponent):
+    return countFlatStones(player) - countFlatStones(opponent)
+
 #scoring criterias: 
 # Road Potential (RP): Evaluate the length of your longest road and potential extensions.
 # Blocking Opponent (BO): Assess how effectively you're blocking the opponent's roads.
