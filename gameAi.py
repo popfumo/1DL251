@@ -55,6 +55,16 @@ def countFlatStones(player):
 def flatStoneDiff(player, opponent):
     return countFlatStones(player) - countFlatStones(opponent)
 
+# Center Control: Count how many pieces the player has in the center of the board
+def centerControl(player, board):
+    center_squares = [(x, y) for x in range(2, 5) for y in range(2, 5)]  # Generate center square coordinates
+    control = 0
+    for x, y in center_squares:
+        cell = board.get_cell(Location(x, y))
+        if not cell.is_empty() and cell.get_top_piece().color == player.color:
+            control += 1
+    return control
+
 #scoring criterias: 
 # Road Potential (RP): Evaluate the length of your longest road and potential extensions.
 # Blocking Opponent (BO): Assess how effectively you're blocking the opponent's roads.
