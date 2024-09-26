@@ -65,6 +65,16 @@ def centerControl(player, board):
             control += 1
     return control
 
+# Edge Control: Count how many pieces the player has along the edges of the board
+def edgeControl(player, board):
+    edges = [(0, y) for y in range(5)] + [(4, y) for y in range(5)] + [(x, 0) for x in range(1, 4)] + [(x, 4) for x in range(1, 4)]
+    control = 0
+    for x, y in edges:
+        cell = board.get_cell(Location(x, y))
+        if not cell.is_empty() and cell.get_top_piece().color == player.color:
+            control += 1
+    return control
+
 #scoring criterias: 
 # Road Potential (RP): Evaluate the length of your longest road and potential extensions.
 # Blocking Opponent (BO): Assess how effectively you're blocking the opponent's roads.
