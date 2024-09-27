@@ -46,6 +46,9 @@ class Location:
     
     def __ne__(self, value):
         return self.x != value.x or self.y != value.y
+    
+    def __hash__(self):
+        return hash((self.x, self.y))
 
 
 # Initializes a player with 0 pieces placed so far
