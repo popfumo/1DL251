@@ -39,7 +39,7 @@ def longestRoad(player, board):
             if not cell.is_empty():
                 top_piece = cell.get_top_piece()
                 if top_piece.color == player.color and top_piece.orientation == Orientation.HORIZONTAL:
-                    connected = find_connected_pieces(Location(row, col), board, player)
+                    connected = find_connected_pieces(board, player,Location(row, col))
                     if len(connected) > 0:
                         longestRoad = len(connected)
     return longestRoad

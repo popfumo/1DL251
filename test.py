@@ -4,6 +4,7 @@ from io import StringIO
 from board import Board, Player, Color, Location, Orientation, Piece
 from game import game, get_player_move
 from interaction_functions import place_piece, unload_piece_recursive
+from gameAi import longestRoad
 
 class TestGame(unittest.TestCase):
     def setUp(self):
@@ -71,6 +72,22 @@ class TestGame(unittest.TestCase):
         output = mock_stdout.getvalue()
         self.assertIn("Attempting to unload from location: 0, 0", output)
         self.assertNotIn("The top piece in this cell is not yours.", output)
+
+    def test_longest_road(self):
+        # Test longest road calculation
+        place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
+        place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
+        place_piece(self.player1, self.board, Location(0, 3), Orientation.HORIZONTAL)
+        place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2, self.board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2, self.board, Location(2, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2, self.board, Location(3, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2, self.board, Location(4, 0), Orientation.HORIZONTAL)
+
+        longest_road_p1 = longestRoad(self.player1, self.board)
+        longest_road_p2 = longestRoad(self.player2, self.board)
+        self.assertEqual(longest_road_p1, 3)
+        self.assertEqual(longest_road_p2, 5)
 
 if __name__ == '__main__':
     unittest.main()
