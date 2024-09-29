@@ -32,4 +32,4 @@ relative/path/to/dir/anotherfile
 
 # Skriv egna ignores efter här
 .vscode/
-.__pycache__/*
+__pycache__/*
