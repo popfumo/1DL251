@@ -96,7 +96,7 @@ def unload_piece_recursive(player, board, num_remove, original_location, current
         print("Error: Cell is not empty but get_top_piece() returned None.")
         return False
 
-    print(f"Top piece: Color - {top_piece.color}, Orientation - {top_piece.orientation}")
+    print(f"Top piece: Color - {top_piece.color}, Orientation - {top_piece.orientation}") #These are just print statements for bug testing
     print(f"Current player color: {player.color}")
 
     if top_piece.color != player.color:
@@ -129,8 +129,6 @@ def unload_piece_recursive(player, board, num_remove, original_location, current
                 print("Cannot place piece in that direction. Try again.")
         else:
             print("Invalid direction. Please choose n, e, s, or w.")
-
-# TODO: Decide who implements this function, AI team or Board team? 
 
 def circle_condtion(player, board, location):
     flag = 0
