@@ -39,26 +39,6 @@ def move_piece(player, board, old_location, new_location):
         return False
 
 
-# new_locations is an array containing coordinates to place the pieces in, the array is ordered from close to far
-def unload_cell(player, board, old_location, new_locations):
-    if len(board.get_cell(old_location).pieces) > 0:
-        top_piece = board.cells[old_location].get_top_piece()
-        if top_piece.color == player.color and top_piece.orientation != Orientation.VERTICAL:
-            for location in new_locations:
-                if not placeable(board, location):
-                    print("unload coordinates not valid")
-                    return False 
-            for location in new_locations:
-                current_piece = board.get_cell(old_location).remove_top_piece()
-                board.get_cell(location).pieces.insert(0, current_piece)
-             
-            return True
-        else:
-            print("Cannot unload piece because the top piece is not the player's piece")
-    else:
-        print("No pieces to unload")
-    return False
-
 def unload_piece_recursive(player, board, num_remove, original_location, current_location):
     print(f"Attempting to unload from location: {original_location}")
     
