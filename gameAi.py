@@ -12,7 +12,7 @@ def setDifficulty():
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
-def bestMove(board, validMoves, difficulty):
+def bestMove(validMoves, difficulty):
     
     if difficulty == "easy":
         # Randomly select a move from the valid moves

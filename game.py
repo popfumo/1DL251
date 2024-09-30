@@ -1,6 +1,7 @@
 from board import Board, Player, Color, Location, Orientation
-from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive
+from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, getAllPossibleMoves
 from game_logic import check_win
+from gameAi import setDifficulty, bestMove
 
 '''
 Init:
@@ -12,12 +13,15 @@ How does a game turn look like?
 3. End game or it's the other players turn.
 
 '''
+
 def game():
     # Initialize the game
     board = Board()
     player1 = Player(Color.BLACK)
     player2 = Player(Color.WHITE)
     current_player = player1  # Black goes first
+    
+    difficulty = setDifficulty()
 
     # Main game loop
     while True:
@@ -52,6 +56,18 @@ def game():
 
         # Switch to the other player
         current_player = player2 if current_player == player1 else player1
+
+        possible_moves = getAllPossibleMoves(board, current_player)
+        best_move = bestMove(possible_moves, difficulty)
+        board = best_move
+
+        if check_win(board, current_player):
+          print(f"{current_player.color.name} wins!")
+          break
+
+        current_player = player2 if current_player == player1 else player1
+
+
 
 def get_player_move(player, board):
     # Prompt player for the type of move they want to make

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import copy
 
 from enum import Enum
 
@@ -30,7 +31,7 @@ class Cell:
     def remove_top_piece(self):
         if len(self.pieces) > 0:
             return self.pieces.pop(0)
-
+    
 class Location:
     # x and y both start at 0 and end at 4
     def __init__(self, x, y):
@@ -60,9 +61,13 @@ class Player:
 
 # Initializes a board with 25 cells
 class Board:
+    num_x: int
+    num_y: int
     def __init__(self):
         # (0, 0) would be the top left
-        self.cells = [[Cell(row, col) for col in range(5)] for row in range(5)]
+        self.num_x = 5
+        self.num_y = 5
+        self.cells = [[Cell(row, col) for col in range(self.num_x)] for row in range(self.num_y)]
         # determine which whose turn is it, black goes first
         # todo: check whose turn it is
         self.turn = 0
@@ -71,6 +76,8 @@ class Board:
     # Returns the pieces in a cell
     def get_cell(self, location):
         return self.cells[location.x][location.y]
+    def copy(self):
+        return copy.deepcopy(self) #sus kanske gör som vi tror
 
 class Piece:
     def __init__(self, location, orientation, color):
