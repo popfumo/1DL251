@@ -2,6 +2,8 @@
 
 from board import Piece, Cell, Player, Board, Orientation, Color, Location
 from game_logic import placeable, are_adjacent
+import copy
+
 
 num_pieces = 21
 
@@ -24,7 +26,6 @@ def place_piece(player, board, location, orientation):
     else:
         print(f"Cannot place piece at {location}")
         return False
-
     
 """
 def place_piece(player, board, location, orientation):
@@ -144,24 +145,8 @@ def circle_condtion(player, board, location):
     return 0
 
 
-#############################################################################################
-#               IMPORTANT NOTE                                                              #              
-#Might have a bug where some stones in a stack dissapear when unloading, lets say we have a #
-#stack of 4 stones and we want to move 2, after we move will the stack be 2 or 4?           #
-#                                               #                                           #
-#  ex: We want 1) to happen but does it?                                                    #
-#                                                                                           #                                          
-#    [x             what might happen: [x                                                   #
-# 1)  x        [x                       x                                                   #
-#     x         x                       x                                                   #
-#     x] -> [x] x]                      x] -> [x][x]                                        #
-#                                                                                           #                                              
-# does this happen? IDK? i dont do testing                                                  #                
-#############################################################################################
-
 def getAllPossibleMoves(board : Board, player: Player):
     """
-    TODO: implement so the roads can turn
     This function will create a list of boards, it will take the current board and make a copy of it, 
     it will then create a new board for each possible move that can be made and append to a list.
     """
@@ -187,32 +172,66 @@ def getAllPossibleMoves(board : Board, player: Player):
             # Add all possible boards that can be created after moving a stack.
             # This is much more complex than placing a new piece, as the ways in which you can move a stack are much greater in numbers
             if not cell.is_empty(): # apparently python does not have lazy evaluation of if statements, hence this is nested
-                if cell.get_top_piece().color == player.color:
-                    # Our color is on top of this cell, meaning we can move as many pieces as we want in this stack.
+                if cell.get_top_piece().color == player.color and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
                     
+                    # Our color is on top of this cell, meaning we can move as many pieces as we want in this stack.
                     # How many pieces do we want to move from the stack? This for loop iterates over the different possible amounts
+                    x,y = cell.location.x, cell.location.y
+                    print(f"finding moves for Cell location: {x}, {y}")
+                    start_location = Location(x,y)
+
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
-                        # Where do we want to place the pieces that we move from the stack? This for loop iterates over the different possible placement combinations
-                        x,y = cell.location.x, cell.location.y
-                        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-                        for dx, dy in directions: # Check adjacent cells
-                            path = []
-                            remaining_pieces = num_pieces_to_move
-                            new_x, new_y = x + dx, y + dy
-                            while (0 <= new_x < board.num_x and 0 <= new_y < board.num_y and remaining_pieces > 0):
-                                if placeable(board, Location(new_x, new_y)):
-                                    path.append(Location(new_x, new_y))
-                                    remaining_pieces -= 1
-                                    
-                                new_x += dx
-                                new_y += dy
-                            
-                            if path:
-                                new_board = board.copy()
-                                unload_cell(player, new_board, Location(x, y), path)
-                                new_boards.append(new_board)
-    
+                        new_boards.append(get_all_possible_boards_after_stack_move(board, player, start_location, num_pieces_to_move))
+
     return new_boards
+
+
+# Returns a list of all possible boards that can be created after moving a stack of pieces
+# num_pieces_to_move is the number of pieces to move from the stack
+# This function is called by getAllPossibleMoves()
+def get_all_possible_boards_after_stack_move(board:Board, player: Player,start_location: Location, num_pieces_to_move: int):
+    assert num_pieces_to_move > 0
+    start_cell: Cell = board.get_cell(start_location)
+    assert not start_cell.is_empty()
+    assert start_cell.get_top_piece().color == player.color
+    assert start_cell.get_top_piece().orientation == Orientation.HORIZONTAL
+    assert num_pieces_to_move <= len(start_cell.pieces)
+
+    colors_of_pieces_to_move = []
+    copy_start_cell = copy.deepcopy(start_cell)
+    for i in range(num_pieces_to_move):
+        piece_to_move = copy_start_cell.remove_top_piece()
+        colors_of_pieces_to_move.append(piece_to_move.color)
+    # cell now has its pieces to move removed. The pieces are put in the list pieces_to_move
+
+    assert len(colors_of_pieces_to_move) == num_pieces_to_move
+    
+    new_boards = []
+    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, new_boards)
+    return new_boards
+
+# This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
+# This function will call itself recursively until there are no pieces to move
+def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
+        new_x, new_y = loc.x + dx, loc.y + dy
+        print(len(colors_of_pieces_to_move))
+        if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure we're within board boundaries
+            new_loc = Location(new_x, new_y)
+            if placeable(board, new_loc):
+                new_board = board.copy() # create new board copy
+                copy_colors_of_pieces_to_move = copy.deepcopy(colors_of_pieces_to_move)
+                new_piece = Piece(new_loc, Orientation.HORIZONTAL, copy_colors_of_pieces_to_move.pop(0))  # Create new piece
+                new_board.get_cell(new_loc).pieces.insert(0, new_piece) # Insert new piece into cell on new board
+                print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
+                # Do we have more pieces to move? if so do the recursive call
+                if len(copy_colors_of_pieces_to_move) > 0:
+                    aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
+                else: 
+                    new_boards.append(new_board)
+            
+    
+
 
 def test():
     p1_color = Color.BLACK

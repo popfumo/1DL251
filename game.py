@@ -27,7 +27,7 @@ def game():
     while True:
         # Display the current board state
         print(board)
-
+        
         # Get player's move
         move = get_player_move(current_player, board)
 

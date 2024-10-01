@@ -72,12 +72,17 @@ class Board:
         # todo: check whose turn it is
         self.turn = 0
     def __str__(self):
-        return f"{self.cells}"
+        string = ""
+        for row in self.cells:
+            for cell in row:
+                string += f"{cell} "
+            string += "\n"
+        return string
     # Returns the pieces in a cell
     def get_cell(self, location):
         return self.cells[location.x][location.y]
     def copy(self):
-        return copy.deepcopy(self) #sus kanske gör som vi tror
+        return copy.deepcopy(self)
 
 class Piece:
     def __init__(self, location, orientation, color):

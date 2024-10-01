@@ -1,6 +1,6 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation
-from board import Player, Color
+from board import Player, Color, Board
 
 def setDifficulty():
     """
@@ -57,8 +57,9 @@ def longestRoad(player, board):
     return longestRoad
 
 #Number of adjecent squares where the player can extend their road
-def potentialRoadExtensions(board):
+def potentialRoadExtensions(board, player):
     return 0
+                    
 
 def countFlatStones(player):
     """
@@ -165,11 +166,6 @@ def score(board, player):
 
     return player_score
 
-
-
-#Helper function, obtains a list of neighbors around a given square on the board
-def neighbours(board, x, y):
-    return 0
 
 def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):
     """

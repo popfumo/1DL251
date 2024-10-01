@@ -5,9 +5,11 @@ from board import Piece, Cell, Player, Board, Orientation, Location, Color
 # Checks if a piece can be placed in a cell, returns True if there is no standing piece, False otherwise
 def placeable(board, location):
     curr_cell = board.get_cell(location)
-    if not curr_cell.is_empty() and curr_cell.get_top_piece().orientation == Orientation.VERTICAL:
-        return False
-    return True
+    return curr_cell.is_empty() or curr_cell.get_top_piece().orientation == Orientation.HORIZONTAL
+    # i rewrote this function to make it more readable, but the replaced code is below /edvin
+    # if not curr_cell.is_empty() and curr_cell.get_top_piece().orientation == Orientation.VERTICAL:
+    #     return False
+    # return True
 
 
 def are_adjacent(loc1, loc2):
@@ -18,7 +20,7 @@ def are_adjacent(loc1, loc2):
         return abs(loc1.x - loc2.x) + abs(loc1.y - loc2.y) == 1
     else:
         raise TypeError("Both arguments must be Location objects")
-    
+
 def find_connected_pieces(board, player,start_location):
     connected = set([start_location])
     to_check = [start_location]

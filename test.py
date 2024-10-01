@@ -78,6 +78,7 @@ class TestGame(unittest.TestCase):
         place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
         place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
         place_piece(self.player1, self.board, Location(0, 3), Orientation.HORIZONTAL)
+        place_piece(self.player1, self.board, Location(1, 3), Orientation.HORIZONTAL)
         place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
         place_piece(self.player2, self.board, Location(1, 0), Orientation.HORIZONTAL)
         place_piece(self.player2, self.board, Location(2, 0), Orientation.HORIZONTAL)
@@ -86,7 +87,7 @@ class TestGame(unittest.TestCase):
 
         longest_road_p1 = longestRoad(self.player1, self.board)
         longest_road_p2 = longestRoad(self.player2, self.board)
-        self.assertEqual(longest_road_p1, 3)
+        self.assertEqual(longest_road_p1, 4)
         self.assertEqual(longest_road_p2, 5)
     
     def test_getAllPossibleMoves(self):
@@ -103,9 +104,6 @@ class TestGame(unittest.TestCase):
         possible_moves = getAllPossibleMoves(board, player1)
         
         # Assert the number of possible moves
-        print("num possible moves: ", len(possible_moves))
-        for moves in possible_moves:
-            print(moves)
 
         assert len(possible_moves) == 56 #we will have 25 horizontal place moves and 25 vertical place moves. 
                                          #Then with a stack of 3 we can move this in 3 different ways, so 3*2 = 6 possible moves. 25+25+6 = 56
