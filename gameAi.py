@@ -1,6 +1,6 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation
-from board import Player, Color, Board
+from board import Player, Color, Board 
 
 def setDifficulty():
     """
@@ -33,80 +33,91 @@ def bestMove(validMoves, difficulty):
         #return bestMove(board, validMoves, depth=2)
         pass
 
-def longestRoad(player, board):
+
+#################################################
+#   NOTE: when scoring, WHITE wants to maximize,#
+#   BLACK wants to minimize                     #
+#################################################
+
+def longestRoad(board):
     """
-    Finds and returns the length of the longest road (horizontal or vertical connection) for the player.
+    Finds and returns the length of the longest road (horizontal or vertical connection).
 
     Args:
-    player: The player object (Player instance).
     board: The game board (Board instance).
 
     Returns:
     The length of the longest road (int).
     """
-    longestRoad = 0
-    for row in range(5):
-        for col in range(5):
+    longest_road_score = 0
+    for row in range(board.num_x):
+        for col in range(board.num_y):
             cell = board.get_cell(Location(row, col))
             if not cell.is_empty():
                 top_piece = cell.get_top_piece()
-                if top_piece.color == player.color and top_piece.orientation == Orientation.HORIZONTAL:
-                    connected = find_connected_pieces(board, player,Location(row, col))
-                    if len(connected) > 0:
-                        longestRoad = len(connected)
-    return longestRoad
+                if top_piece.color == Color.WHITE and top_piece.orientation == Orientation.HORIZONTAL:
+                    connected = find_connected_pieces(board, Color.WHITE,Location(row, col))
+                    if len(connected) > 0 and len(connected) > longest_road_score:
+                        longest_road_score = len(connected)
+                elif top_piece.color == Color.BLACK and top_piece.orientation == Orientation.HORIZONTAL:
+                    connected = find_connected_pieces(board, Color.BLACK,Location(row, col))
+                    if len(connected) > 0 and len(connected) > longest_road_score:
+                        longest_road_score = -len(connected)
+
+    return longest_road_score
 
 #Number of adjecent squares where the player can extend their road
 def potentialRoadExtensions(board, player):
     return 0
                     
-
-def countFlatStones(player):
-    """
-    Counts the number of pieces the player has placed on the board.
-
-    Args:
-    player: The player object (Player instance).
-
-    Returns:
-    Number of flat stones placed (int).
-    """
-    return player.pieces_placed
-
-def flatStoneDiff(player, opponent):
+def flatStoneDiff(board):
     """
     Calculates the flat stone differential between the player and the opponent.
     FSD criteria.
 
     Args:
-    player: The player object (Player instance).
-    opponent: The opponent player object (Player instance).
+    board: the board to count the flatstones on
 
     Returns:
     The flat stone differential (int).
     """
-    return countFlatStones(player) - countFlatStones(opponent)
+    placement_score = 0
 
-def centerControl(player, board):
+    for row in range(board.num_x):
+        for col in range(board.num_y):
+            cell = board.get_cell(Location(row, col))
+            if not cell.is_empty():
+                top_piece = cell.get_top_piece()
+                if top_piece.color == Color.WHITE:
+                    placement_score += 1
+                elif top_piece.color == Color.BLACK:
+                    placement_score -= 1
+
+    return placement_score
+
+def centerControl(board):
     """
     Calculates how many center squares the player controls. Center control criteria.
 
     Args:
-    player: The player object (Player instance).
     board: The game board (Board instance).
 
     Returns:
-    The number of center squares controlled by the player (int).
+    The center score.
     """
     center_squares = [(x, y) for x in range(2, 5) for y in range(2, 5)]  # Generate center square coordinates
-    control = 0
+    center_score = 0
+
     for x, y in center_squares:
         cell = board.get_cell(Location(x, y))
-        if not cell.is_empty() and cell.get_top_piece().color == player.color:
-            control += 1
-    return control
+        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE:
+            center_score += 1
+        elif not cell.is_empty() and cell.get_top_piece().color == Color.BLACK:
+            center_score -= 1
 
-def edgeControl(player, board):
+    return center_score
+
+def edgeControl(board):
     """
     Calculates how many edge squares the player controls. Edge control criteria.
 
@@ -118,14 +129,17 @@ def edgeControl(player, board):
     The number of edge squares controlled by the player (int).
     """
     edges = [(0, y) for y in range(5)] + [(4, y) for y in range(5)] + [(x, 0) for x in range(1, 4)] + [(x, 4) for x in range(1, 4)]
-    control = 0
+    edge_score = 0
     for x, y in edges:
         cell = board.get_cell(Location(x, y))
-        if not cell.is_empty() and cell.get_top_piece().color == player.color:
-            control += 1
-    return control
+        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE:
+            edge_score += 1
+        elif not cell.is_empty() and cell.get_top_piece().color == Color.BLACK:
+            edge_score -= 1
 
-def score(board, player):
+    return edge_score
+
+def score(board):
     """
     Evaluates the player's score based on various criteria:
     - Road Potential (RP): Evaluate the length of your longest road and potential extensions.
@@ -135,22 +149,27 @@ def score(board, player):
     - Edge Control (EC): The amount of edge pieces a player has, the more the better
 
     Args:
-    board: The game board (Board instance).
-    player: The player object (Player instance).
+    board: The game board to be scored
 
     Returns:
-    The total score for the player (int).
+    The total score for the board (int).
     """
-    # Define the opponent (you can add an opponent parameter instead if needed)
-    opponent = Player(Color.WHITE if player.color == Color.BLACK else Color.BLACK)
+
+    board_score = 0
     
     # Calculate each criterion for the player and opponent
-    player_longest_road = longestRoad(player, board)
-    # TODO: Calculate opponents longest road
+    player_longest_road = longestRoad(board)
+    print(f'longest road:{player_longest_road}')
     
-    player_flat_stones = flatStoneDiff(player, opponent)
-    center_control = centerControl(player, board)
-    edge_control = edgeControl(player, board)
+    # TODO: Calculate extention potential
+    # TODO: blocking opponent
+    
+    player_flat_stones = flatStoneDiff(board)
+    print(f'flatstone diff:{player_flat_stones}')
+    center_control = centerControl(board)
+    print(f'center control:{center_control}')
+    edge_control = edgeControl(board)
+    print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
     weight_longest_road = 5
@@ -159,12 +178,12 @@ def score(board, player):
     weight_edge_control = 1
 
     # Calculate the score for the player
-    player_score = (player_longest_road * weight_longest_road) + \
+    board_score = (player_longest_road * weight_longest_road) + \
                    (player_flat_stones * weight_flat_stones) + \
                    (center_control * weight_center_control) + \
                    (edge_control * weight_edge_control)
 
-    return player_score
+    return board_score
 
 
 def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):

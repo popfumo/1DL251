@@ -22,32 +22,34 @@ class TestGameAi(unittest.TestCase):
         self.board.get_cell(Location(0, 2)).pieces.append(Piece(Location(0, 2), Orientation.HORIZONTAL, Color.BLACK))
         self.board.get_cell(Location(0, 3)).pieces.append(Piece(Location(0, 3), Orientation.HORIZONTAL, Color.BLACK))
         
-        longest_road = longestRoad(self.player1, self.board)
-        self.assertEqual(longest_road, 3)
+        longest_road = longestRoad(self.board)
+        self.assertEqual(longest_road, -3)
 
     def test_centerControl(self):
         # Test center control calculation for player1
         self.board.get_cell(Location(2, 2)).pieces.append(Piece(Location(2, 2), Orientation.HORIZONTAL, Color.BLACK))
         self.board.get_cell(Location(3, 3)).pieces.append(Piece(Location(3, 3), Orientation.HORIZONTAL, Color.BLACK))
         
-        control = centerControl(self.player1, self.board)
-        self.assertEqual(control, 2)
+        control = centerControl(self.board)
+        self.assertEqual(control, -2)
 
     def test_edgeControl(self):
         # Test edge control calculation for player1
         self.board.get_cell(Location(0, 0)).pieces.append(Piece(Location(0, 0), Orientation.HORIZONTAL, Color.BLACK))
         self.board.get_cell(Location(4, 4)).pieces.append(Piece(Location(4, 4), Orientation.HORIZONTAL, Color.BLACK))
         
-        control = edgeControl(self.player1, self.board)
-        self.assertEqual(control, 2)
+        control = edgeControl(self.board)
+        self.assertEqual(control, -2)
 
     def test_flatStoneDiff(self):
         # Test flat stone differential calculation between two players
-        self.player1.pieces_placed = 5
-        self.player2.pieces_placed = 3
+        self.board.get_cell(Location(0, 1)).pieces.append(Piece(Location(0, 1), Orientation.HORIZONTAL, Color.BLACK))
+        self.board.get_cell(Location(0, 2)).pieces.append(Piece(Location(0, 2), Orientation.HORIZONTAL, Color.BLACK))
+        self.board.get_cell(Location(0, 3)).pieces.append(Piece(Location(0, 3), Orientation.HORIZONTAL, Color.BLACK))
+        self.board.get_cell(Location(0, 4)).pieces.append(Piece(Location(0, 4), Orientation.HORIZONTAL, Color.WHITE))
         
-        diff = flatStoneDiff(self.player1, self.player2)
-        self.assertEqual(diff, 2)
+        diff = flatStoneDiff(self.board)
+        self.assertEqual(diff, -2)
 
     def test_score(self):
         # Test score calculation for player1
@@ -55,8 +57,8 @@ class TestGameAi(unittest.TestCase):
         self.board.get_cell(Location(2, 2)).pieces.append(Piece(Location(2, 2), Orientation.HORIZONTAL, Color.BLACK))
         self.board.get_cell(Location(3, 3)).pieces.append(Piece(Location(3, 3), Orientation.HORIZONTAL, Color.BLACK))
 
-        score_value = score(self.board, self.player1)
-        self.assertGreater(score_value, 0)
+        score_value = score(self.board)
+        self.assertEqual(score_value, -18)
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,7 +21,7 @@ def are_adjacent(loc1, loc2):
     else:
         raise TypeError("Both arguments must be Location objects")
 
-def find_connected_pieces(board, player,start_location):
+def find_connected_pieces(board, player_color:Color,start_location):
     connected = set([start_location])
     to_check = [start_location]
     
@@ -34,7 +34,7 @@ def find_connected_pieces(board, player,start_location):
                 cell = board.get_cell(new_location)
                 top_piece = cell.get_top_piece()
                 if (top_piece and 
-                    top_piece.color == player.color and 
+                    top_piece.color == player_color and 
                     top_piece.orientation == Orientation.HORIZONTAL and
                     new_location not in connected):
                     connected.add(new_location)
@@ -42,7 +42,7 @@ def find_connected_pieces(board, player,start_location):
     
     return connected
 
-def check_win(board, player):
+def check_win(board, player_color:Color):
     """
     Check if the given player has won the game by finding a path of their pieces
     from one side of the board to the opposite side.
@@ -59,8 +59,8 @@ def check_win(board, player):
     for y in range(5):
         start_cell = board.get_cell(Location(0, y))
         start_piece = start_cell.get_top_piece()
-        if start_piece and start_piece.color == player.color and start_piece.orientation == Orientation.HORIZONTAL:
-            connected = find_connected_pieces(board, player, Location(0, y))
+        if start_piece and start_piece.color == player_color and start_piece.orientation == Orientation.HORIZONTAL:
+            connected = find_connected_pieces(board, player_color, Location(0, y))
             if any(loc.x == 4 for loc in connected):
                 return True
 
@@ -68,8 +68,8 @@ def check_win(board, player):
     for x in range(5):
         start_cell = board.get_cell(Location(x, 0))
         start_piece = start_cell.get_top_piece()
-        if start_piece and start_piece.color == player.color and start_piece.orientation == Orientation.HORIZONTAL:
-            connected = find_connected_pieces(board, player, Location(x, 0))
+        if start_piece and start_piece.color == player_color and start_piece.orientation == Orientation.HORIZONTAL:
+            connected = find_connected_pieces(board, player_color, Location(x, 0))
             if any(loc.y == 4 for loc in connected):
                 return True
 
