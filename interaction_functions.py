@@ -22,6 +22,7 @@ def place_piece(player, board, location, orientation):
         player.pieces_placed += 1
         board.get_cell(location).pieces.insert(0, new_piece)
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
+        board.turn = board.turn.opposite()
         return True
     else:
         print(f"Cannot place piece at {location}")
@@ -56,6 +57,7 @@ def move_piece(player, board, old_location, new_location):
         piece_to_move = board.get_cell(top_piece.location).remove_top_piece()
         piece_to_move.location = new_location
         board.get_cell(new_location).pieces.insert(0, piece_to_move)
+        board.turn = board.turn.opposite()
         return True
     else:
         return False
@@ -74,7 +76,7 @@ def unload_cell(player, board, old_location, new_locations):
             for location in new_locations:
                 current_piece = board.get_cell(old_location).remove_top_piece()
                 board.get_cell(location).pieces.insert(0, current_piece)
-             
+            board.turn = board.turn.opposite()
             return True
         else:
             print("Cannot unload piece because the top piece is not the player's piece")
@@ -125,6 +127,7 @@ def unload_piece_recursive(player, board, num_remove, original_location, current
                 if num_remove > 1:
                     return unload_piece_recursive(player, board, num_remove - 1, original_location, new_location)
                 else:
+                    board.turn = board.turn.opposite()
                     return True
             else:
                 print("Cannot place piece in that direction. Try again.")
@@ -233,11 +236,4 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
     
 
 
-def test():
-    p1_color = Color.BLACK
-    p2_color = Color.WHITE
-    player1 = Player(p1_color)
-    player2 = Player(p2_color)
-    b = Board()
-    
 

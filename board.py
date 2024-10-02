@@ -9,6 +9,8 @@ NUM_PIECES = 21
 class Color(Enum):
     BLACK = 1
     WHITE = 2
+    def opposite(self):
+        return Color.BLACK if self == Color.WHITE else Color.WHITE
 
 class Orientation(Enum):
     HORIZONTAL = 1
@@ -70,7 +72,9 @@ class Board:
         self.cells = [[Cell(row, col) for col in range(self.num_x)] for row in range(self.num_y)]
         # determine which whose turn is it, black goes first
         # todo: check whose turn it is
-        self.turn = 0
+
+        # As per game requirment, black goes first
+        self.turn = Color.BLACK
     def __str__(self):
         string = ""
         for row in self.cells:

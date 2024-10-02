@@ -27,7 +27,7 @@ def game():
     while True:
         # Display the current board state
         print(board)
-        
+        print(board.turn)
         # Get player's move
         move = get_player_move(current_player, board)
 
@@ -48,7 +48,7 @@ def game():
         if check_win(board, current_player):
             print(f"{current_player.color.name} wins!")
             break
-
+        print(board.turn)
         # Check for a stalemate (you'll need to implement this function) TODO
         #if is_stalemate(board):
         #    print("The game is a draw.")
@@ -58,7 +58,7 @@ def game():
         current_player = player2 if current_player == player1 else player1
 
         possible_moves = getAllPossibleMoves(board, current_player)
-        best_move = bestMove(board,possible_moves, difficulty)
+        best_move = bestMove(possible_moves, difficulty)
         board = best_move
 
         if check_win(board, current_player):
