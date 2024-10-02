@@ -87,6 +87,8 @@ class Board:
         return self.cells[location.x][location.y]
     def copy(self):
         return copy.deepcopy(self)
+    def white_to_move(self):
+        return self.turn == Color.WHITE
 
 class Piece:
     def __init__(self, location, orientation, color):

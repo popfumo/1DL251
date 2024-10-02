@@ -1,6 +1,12 @@
 import random
-from game_logic import find_connected_pieces, Location, Orientation
-from board import Player, Color, Board 
+from game_logic import find_connected_pieces, Location, Orientation, check_win
+from board import Player, Color, Board
+from interaction_functions import getAllPossibleMoves 
+
+WIN = 10000
+
+MAX_DEPTH = 2 #this needs to be changed per difficulty but it is global for ease of development
+
 
 def setDifficulty():
     """
@@ -15,23 +21,23 @@ def setDifficulty():
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
-def bestMove(validMoves, difficulty):
+def bestMove(board,validMoves, difficulty):
     
     if difficulty == "easy":
         # Randomly select a move from the valid moves
         return random.choice(validMoves)
     
-    # TODO: return minimax function with depth 1
     elif difficulty == "medium":
-        # Use Minimax with depth 1
-        #return bestMove(board, validMoves, depth=1)
-        pass
+
+        find_best_move_minimax(board, validMoves)
+
+        return next_move
     
-    # TODO: return minimax function with depth 1
     elif difficulty == "hard":
-        # Use Minimax with depth 2
-        #return bestMove(board, validMoves, depth=2)
-        pass
+
+        find_best_move_minimax(board, validMoves)
+
+        return next_move
 
 
 #################################################
@@ -156,6 +162,11 @@ def score(board):
     """
 
     board_score = 0
+
+    if check_win(board, Color.WHITE):#White wins
+        return WIN 
+    elif check_win(board, Color.BLACK):#Black wins
+        return -WIN
     
     # Calculate each criterion for the player and opponent
     player_longest_road = longestRoad(board)
@@ -186,30 +197,50 @@ def score(board):
     return board_score
 
 
-def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):
-    """
-    Recursive implementation of the Minimax algorithm.
 
-    Args:
-    currDepth: The current depth of the tree.
-    nodeIndex: The index of the current node in the scores list.
-    maxTurn: True if it's the maximizing player's turn, False otherwise.
-    scores: List of scores for the terminal nodes.
-    targetDepth: The depth limit for the Minimax algorithm.
+#TODO: FIX THE TODO IN FIND_MOVE_MINIMAX
+#helper function, it purpose is to make the initial call to the recursive function find_move_minimax and then return the result
+def find_best_move_minimax(board, valid_moves,):
+    global next_move
+    next_move = None
+    find_move_minimax(board, valid_moves, MAX_DEPTH, board.white_to_move())
+    return next_move
 
-    Returns:
-    The score of the optimal move for the current player.
-    """
+#recursive function that finds the best move for the player
+def find_move_minimax(board, valid_moves, depth, white_to_move):
 
-    # Base case
-    if (currDepth == targetDepth):
-        return scores[nodeIndex]
+    global next_move #Needs to be global, cuz it is used in the recursive function
     
-    # Maxing player turn
-    if maxTurn:
-        return max(miniMax(currDepth + 1, nodeIndex * 2, False, scores, targetDepth)
-                   ,miniMax(currDepth + 1, nodeIndex * 2 + 1, False, scores, targetDepth))
-    # Min player turn
+    #If the depth is 0, we have reached the end of the search tree
+    if depth == 0:
+        return score(board)
+    
+    if white_to_move:
+        max_score = -WIN
+
+        for move in valid_moves:
+            board = move
+            next_moves = getAllPossibleMoves(board, Color.WHITE) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
+            #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
+            score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
+            if score > max_score:
+                max_score = score
+                if depth == MAX_DEPTH: 
+                    next_move = move
+        return max_score
+
     else:
-        return min(miniMax(currDepth + 1, nodeIndex * 2, False, scores, targetDepth)
-                   ,miniMax(currDepth + 1, nodeIndex * 2 + 1, False, scores, targetDepth))
+        min_score = WIN
+
+        for move in valid_moves:
+            board = move
+            next_moves = getAllPossibleMoves(board, Color.BLACK)
+            score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
+            if score < min_score:
+                min_score = score
+                if depth == MAX_DEPTH:
+                    next_move = move
+        
+        return min_score
+
+        
