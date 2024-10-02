@@ -13,7 +13,7 @@ class TestGameAi(unittest.TestCase):
     def test_bestMove_easy(self):
         # Test bestMove for easy difficulty (random move)
         valid_moves = [('place', 1, 1, Orientation.HORIZONTAL), ('place', 2, 2, Orientation.VERTICAL)]
-        move = bestMove(self.board, valid_moves, 'easy')
+        move = bestMove(valid_moves, 'easy')
         self.assertIn(move, valid_moves)
 
     def test_longestRoad(self):
