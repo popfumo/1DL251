@@ -45,7 +45,7 @@ def game():
             continue
 
         # Check for a win
-        if check_win(board, current_player):
+        if check_win(board, current_player.color):
             print(f"{current_player.color.name} wins!")
             break
         print(board.turn)
@@ -57,11 +57,11 @@ def game():
         # Switch to the other player
         current_player = player2 if current_player == player1 else player1
 
-        possible_moves = getAllPossibleMoves(board, current_player)
+        possible_moves = getAllPossibleMoves(board, current_player.color)
         best_move = bestMove(board, possible_moves, difficulty)
         board = best_move
 
-        if check_win(board, current_player):
+        if check_win(board, current_player.color):
           print(f"{current_player.color.name} wins!")
           break
 

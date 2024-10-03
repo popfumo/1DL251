@@ -75,11 +75,11 @@ def longestRoad(board):
 #Number of adjecent squares where the player can extend their road
 def potentialRoadExtensions(board, player):
     return 0
-                    
+
 def flatStoneDiff(board):
     """
     Calculates the flat stone differential between the player and the opponent.
-    FSD criteria.
+    FSD criteria. Does not take into consideration stacks.
 
     Args:
     board: the board to count the flatstones on
@@ -111,7 +111,7 @@ def centerControl(board):
     Returns:
     The center score.
     """
-    center_squares = [(x, y) for x in range(2, 5) for y in range(2, 5)]  # Generate center square coordinates
+    center_squares = [(x, y) for x in range(1, 3) for y in range(1, 3)]  # Generate center square coordinates
     center_score = 0
 
     for x, y in center_squares:
@@ -134,7 +134,7 @@ def edgeControl(board):
     Returns:
     The number of edge squares controlled by the player (int).
     """
-    edges = [(0, y) for y in range(5)] + [(4, y) for y in range(5)] + [(x, 0) for x in range(1, 4)] + [(x, 4) for x in range(1, 4)]
+    edges = [(0, y) for y in range(4)] + [(4, y) for y in range(4)] + [(x, 0) for x in range(0, 4)] + [(x, 4) for x in range(0, 4)]
     edge_score = 0
     for x, y in edges:
         cell = board.get_cell(Location(x, y))
@@ -196,8 +196,6 @@ def score(board):
 
     return board_score
 
-
-
 #TODO: FIX THE TODO IN FIND_MOVE_MINIMAX
 #helper function, it purpose is to make the initial call to the recursive function find_move_minimax and then return the result
 def find_best_move_minimax(board, valid_moves,):
@@ -207,24 +205,26 @@ def find_best_move_minimax(board, valid_moves,):
     return next_move
 
 #recursive function that finds the best move for the player
-def find_move_minimax(board, valid_moves, depth, white_to_move):
+def find_move_minimax(board, valid_moves, depth, white_to_move):    
+
+    print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
     #If the depth is 0, we have reached the end of the search tree
     if depth == 0:
         return score(board)
-    
+
     if white_to_move:
         max_score = -WIN
 
         for move in valid_moves:
             board = move
-            next_moves = getAllPossibleMoves(board, Color.WHITE) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
+            next_moves = getAllPossibleMoves(board, Color.BLACK) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
             #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
-            score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
-            if score > max_score:
-                max_score = score
+            current_score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
+            if current_score > max_score:
+                max_score = current_score
                 if depth == MAX_DEPTH: 
                     next_move = move
         return max_score
@@ -234,13 +234,12 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
 
         for move in valid_moves:
             board = move
-            next_moves = getAllPossibleMoves(board, Color.BLACK)
-            score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
-            if score < min_score:
-                min_score = score
+            next_moves = getAllPossibleMoves(board, Color.WHITE)
+            current_score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
+            if current_score < min_score:
+                min_score = current_score
                 if depth == MAX_DEPTH:
                     next_move = move
         
         return min_score
 
-        

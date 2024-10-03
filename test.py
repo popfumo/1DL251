@@ -14,20 +14,20 @@ class TestGame(unittest.TestCase):
 
     def test_place_piece(self):
         # Test placing a piece
-        result = place_piece(self.player2, self.board, Location(1, 1), Orientation.HORIZONTAL)
+        result = place_piece(self.player2.color, self.board, Location(1, 1), Orientation.HORIZONTAL)
         self.assertTrue(result)
         self.assertEqual(len(self.board.get_cell(Location(1, 1)).pieces), 1)
         self.assertEqual(self.board.get_cell(Location(1, 1)).pieces[0].color, Color.WHITE)
 
     def test_piece_creation(self):
         # Test correct piece creation
-        piece = Piece(Location(0, 0), Orientation.HORIZONTAL, self.player1)
+        piece = Piece(Location(0, 0), Orientation.HORIZONTAL, self.player1.color)
         self.assertEqual(piece.color, Color.BLACK)
         self.assertIsInstance(piece.color, Color)
 
     def test_piece_placement(self):
         # Test piece placement and retrieval
-        place_piece(self.player1, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
         cell = self.board.get_cell(Location(0, 0))
         self.assertEqual(len(cell.pieces), 1)
         top_piece = cell.get_top_piece()
@@ -36,8 +36,8 @@ class TestGame(unittest.TestCase):
 
     def test_multiple_piece_placement(self):
         # Test multiple piece placement
-        place_piece(self.player1, self.board, Location(0, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
         cell = self.board.get_cell(Location(0, 0))
         self.assertEqual(len(cell.pieces), 2)
         top_piece = cell.get_top_piece()
@@ -46,7 +46,7 @@ class TestGame(unittest.TestCase):
     @patch('builtins.input', side_effect=['0', '0', '1'])
     def test_unload_piece_color_check(self, mock_input):
         # Set up the board state
-        place_piece(self.player1, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
         
         # Attempt to unload with the wrong player
         result = unload_piece_recursive(self.player2, self.board, 1, Location(0, 0), Location(0, 0))
@@ -55,7 +55,7 @@ class TestGame(unittest.TestCase):
     @patch('builtins.input', side_effect=['0', '0', '1', 'e'])
     def test_successful_unload(self, mock_input):
         # Set up the board state
-        place_piece(self.player1, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
         
         # Attempt to unload with the correct player
         result = unload_piece_recursive(self.player1, self.board, 1, Location(0, 0), Location(0, 0))
@@ -75,47 +75,92 @@ class TestGame(unittest.TestCase):
 
     def test_longest_road_for_WHITE(self):
         # Test longest road calculation
-        place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(0, 3), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(1, 3), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(1, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(2, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(3, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(4, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 1), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 2), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 3), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(1, 3), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(2, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(3, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(4, 0), Orientation.HORIZONTAL)
 
         longest_road_p1 = longestRoad(self.board)
         self.assertEqual(longest_road_p1, 5)
 
     def test_longest_road_for_BLACK(self):
         # Test longest road calculation
-        place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(0, 3), Orientation.HORIZONTAL)
-        place_piece(self.player1, self.board, Location(1, 3), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
-        place_piece(self.player2, self.board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 1), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 2), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(0, 3), Orientation.HORIZONTAL)
+        place_piece(self.player1.color, self.board, Location(1, 3), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(self.player2.color, self.board, Location(1, 0), Orientation.HORIZONTAL)
 
         longest_road_p1 = longestRoad(self.board)
         self.assertEqual(longest_road_p1, -4)
-    
-    def test_getAllPossibleMoves(self):
+
+
+    def test_getAllPossibleMoves_middle_1(self):
         # Create a board with some initial pieces
         board = Board()
         player1 = Player(Color.BLACK)
         player2 = Player(Color.WHITE)
 
-        place_piece(player1, board, Location(0, 0), Orientation.HORIZONTAL)
-        place_piece(player1, board, Location(0, 0), Orientation.HORIZONTAL)
-        place_piece(player1, board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        
         
         # Get all possible moves
-        possible_moves = getAllPossibleMoves(board, player1)
+        possible_moves = getAllPossibleMoves(board, player1.color)
         
+        print(f'middle test possible moves: {len(possible_moves)}')
+        
+        assert (len(possible_moves) == (25 +25+ 4)) # 25 flat placements, 25 standing placements, 4 piece-movements available         
+        # Assert the number of possible moves
+        
+    def test_getAllPossibleMoves_middle_2(self):
+        # Create a board with some initial pieces
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        # place a stack of two pieces of your own color in the middle
+        place_piece(player1.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        
+        # Get all possible moves
+        possible_moves = getAllPossibleMoves(board, player1.color)
+        
+        for b in possible_moves:
+            pm_copy = possible_moves.copy()
+            pm_copy.remove(b)
+            for other in pm_copy: # idk might work
+                assert (b != other)                
+
+        print(f'middle test possible moves: {len(possible_moves)}')
+        
+        assert (len(possible_moves) == (25 + 25 + 4 + 4*4)) # 25 flat placements, 25 standing placements, 4 (move 1) + 4*4 (move 2) piece-movements available
         # Assert the number of possible moves
 
-        assert len(possible_moves) == 53
+    def test_getAllPossibleMoves_middle_3(self):
+        # Create a board with some initial pieces
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        
+        # Get all possible moves
+        possible_moves = getAllPossibleMoves(board, player1.color)
+
+        print(f'possible moves: {len(possible_moves)}')
+        
+        # Assert the number of possible moves
+        # 25 flat placements, 25 standing placements, 4 (move 1) + 4*4 (move 2) + 4*4*4 (move 3) - 4 because we hit the edge of the board 4 times when moving 3, piece-movements available
+        assert (len(possible_moves) == (25 + 25 + 4 + 4*4 + 4*4*4) - 4)
+        
        
 
 

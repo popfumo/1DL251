@@ -57,7 +57,7 @@ class Location:
 # Initializes a player with 0 pieces placed so far
 class Player:
     def __init__(self, color):
-        self.pieces = []
+        # self.pieces = []
         self.pieces_placed = 0
         self.color = color
 
@@ -89,6 +89,13 @@ class Board:
         return copy.deepcopy(self)
     def white_to_move(self):
         return self.turn == Color.WHITE
+    
+    def __eq__(self, value: object) -> bool:
+        rval:bool = isinstance(value, Board)
+        for x in range(self.num_x):
+            for y in range(self.num_y):
+                rval = rval and self.cells[x][y].pieces == value.cells[x][y].pieces
+        return rval         
 
 class Piece:
     def __init__(self, location, orientation, color):

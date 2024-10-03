@@ -13,13 +13,13 @@ num_pieces = 21
 #               IMPORTANT NOTE                                                         #                    
 #Due to how we have implemented placing a new move the AI will use more then 21 stones #
 #either we have to change so the AI can use more then 21 stones or some other option   #                                         
-#                                               #                                      # 
+#                                                                                      # 
 ########################################################################################
-def place_piece(player, board, location, orientation):     
+def place_piece(player_color:Color, board, location, orientation):     
     if placeable(board, location):
-        new_piece = Piece(location, orientation, player.color)  # Use player.color instead of player
-        player.pieces.insert(0, new_piece)
-        player.pieces_placed += 1
+        new_piece = Piece(location, orientation, player_color)  # Use player.color instead of player
+        #player.pieces.insert(0, new_piece)
+        #player.pieces_placed += 1
         board.get_cell(location).pieces.insert(0, new_piece)
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
         board.turn = board.turn.opposite()
@@ -48,10 +48,10 @@ def place_piece(player, board, location, orientation):
 
 # Moves a piece to a new location. Returns True if the piece was moved, False otherwise
 # Checks if the piece can be placed in the new location by looking at the top piece of the cell at the new location
-def move_piece(player, board, old_location, new_location):
+def move_piece(player_color, board, old_location, new_location):
     if placeable(board, new_location) and not board.get_cell(old_location).is_empty() and old_location != new_location and are_adjacent(old_location, new_location) :
         top_piece = board.get_cell(old_location).get_top_piece()
-        if top_piece.orientation == Orientation.VERTICAL and top_piece.color != player.color:
+        if top_piece.orientation == Orientation.VERTICAL and top_piece.color != player_color:
             print("Cannot move piece because the top piece is a vertical piece or the top piece is not the player's piece") 
             return False
         piece_to_move = board.get_cell(top_piece.location).remove_top_piece()
@@ -148,7 +148,7 @@ def circle_condtion(player, board, location):
     return 0
 
 
-def getAllPossibleMoves(board : Board, player: Player):
+def getAllPossibleMoves(board : Board, player_color: Color):
     """
     This function will create a list of boards, it will take the current board and make a copy of it, 
     it will then create a new board for each possible move that can be made and append to a list.
@@ -165,17 +165,17 @@ def getAllPossibleMoves(board : Board, player: Player):
             # If the cell is empty or has a horizontal piece on top, we can place a piece
             if cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL: 
                 new_horizontal_board: Board = board.copy()
-                place_piece(player, new_horizontal_board, Location(row,col), Orientation.HORIZONTAL)                
+                place_piece(player_color, new_horizontal_board, Location(row,col), Orientation.HORIZONTAL)                
                 new_boards.append(new_horizontal_board)
 
                 new_vertical_board: Board = board.copy()
-                place_piece(player, new_vertical_board, Location(row,col), Orientation.VERTICAL)                
+                place_piece(player_color, new_vertical_board, Location(row,col), Orientation.VERTICAL)                
                 new_boards.append(new_vertical_board)
-            
+
             # Add all possible boards that can be created after moving a stack.
             # This is much more complex than placing a new piece, as the ways in which you can move a stack are much greater in numbers
             if not cell.is_empty(): # apparently python does not have lazy evaluation of if statements, hence this is nested
-                if cell.get_top_piece().color == player.color and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
+                if cell.get_top_piece().color == player_color and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
                     
                     # Our color is on top of this cell, meaning we can move as many pieces as we want in this stack.
                     # How many pieces do we want to move from the stack? This for loop iterates over the different possible amounts
@@ -184,19 +184,20 @@ def getAllPossibleMoves(board : Board, player: Player):
                     start_location = Location(x,y)
 
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
-                        new_boards.append(get_all_possible_boards_after_stack_move(board, player, start_location, num_pieces_to_move))
-
+                        print(f"num_pieces_to_move: {num_pieces_to_move}")
+                        new_boards.extend(get_all_possible_boards_after_stack_move(board, player_color, start_location, num_pieces_to_move))
+                        print(f"new_boards length: {len(new_boards)}")
     return new_boards
 
 
 # Returns a list of all possible boards that can be created after moving a stack of pieces
 # num_pieces_to_move is the number of pieces to move from the stack
 # This function is called by getAllPossibleMoves()
-def get_all_possible_boards_after_stack_move(board:Board, player: Player,start_location: Location, num_pieces_to_move: int):
+def get_all_possible_boards_after_stack_move(board:Board, player_color,start_location: Location, num_pieces_to_move: int):
     assert num_pieces_to_move > 0
     start_cell: Cell = board.get_cell(start_location)
     assert not start_cell.is_empty()
-    assert start_cell.get_top_piece().color == player.color
+    assert start_cell.get_top_piece().color == player_color
     assert start_cell.get_top_piece().orientation == Orientation.HORIZONTAL
     assert num_pieces_to_move <= len(start_cell.pieces)
 
@@ -219,6 +220,7 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
         new_x, new_y = loc.x + dx, loc.y + dy
         print(len(colors_of_pieces_to_move))
+        print(f'looking in direction {dx}, {dy}')
         if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure we're within board boundaries
             new_loc = Location(new_x, new_y)
             if placeable(board, new_loc):
@@ -232,8 +234,3 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                     aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
                 else: 
                     new_boards.append(new_board)
-            
-    
-
-
-
