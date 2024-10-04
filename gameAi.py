@@ -2,11 +2,17 @@ import random
 from game_logic import find_connected_pieces, Location, Orientation, check_win
 from board import Player, Color, Board
 from interaction_functions import getAllPossibleMoves 
+import threading
+
 
 WIN = 10000
 
 MAX_DEPTH = 2 #this needs to be changed per difficulty but it is global for ease of development
 
+def find_best_move_thread(board, valid_moves):
+    global next_move
+    next_move = None
+    find_best_move(board, valid_moves)
 
 def setDifficulty():
     """
@@ -28,14 +34,17 @@ def bestMove(board,validMoves, difficulty):
         return random.choice(validMoves)
     
     elif difficulty == "medium":
-
-        find_best_move_minimax(board, validMoves)
-
+        thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
+        
+        thread.start()
+        
+        thread.join()
+        
         return next_move
     
     elif difficulty == "hard":
 
-        find_best_move_minimax(board, validMoves)
+        find_best_move(board, validMoves)
 
         return next_move
 
@@ -76,7 +85,7 @@ def longestRoad(board):
 def potentialRoadExtensions(board, player):
     return 0
 
-def flatStoneDiff(board):
+def flatStoneDiff(board:Board):
     """
     Calculates the flat stone differential between the player and the opponent.
     FSD criteria. Does not take into consideration stacks.
@@ -87,19 +96,8 @@ def flatStoneDiff(board):
     Returns:
     The flat stone differential (int).
     """
-    placement_score = 0
 
-    for row in range(board.num_x):
-        for col in range(board.num_y):
-            cell = board.get_cell(Location(row, col))
-            if not cell.is_empty():
-                top_piece = cell.get_top_piece()
-                if top_piece.color == Color.WHITE:
-                    placement_score += 1
-                elif top_piece.color == Color.BLACK:
-                    placement_score -= 1
-
-    return placement_score
+    return board.white_pieces_placed - board.black_pieces_placed
 
 def centerControl(board):
     """
@@ -111,7 +109,7 @@ def centerControl(board):
     Returns:
     The center score.
     """
-    center_squares = [(x, y) for x in range(1, 3) for y in range(1, 3)]  # Generate center square coordinates
+    center_squares = [(x, y) for x in range(1, 4) for y in range(1, 4)]  # Generate center square coordinates
     center_score = 0
 
     for x, y in center_squares:
@@ -170,17 +168,17 @@ def score(board):
     
     # Calculate each criterion for the player and opponent
     player_longest_road = longestRoad(board)
-    print(f'longest road:{player_longest_road}')
+    #print(f'longest road:{player_longest_road}')
     
     # TODO: Calculate extention potential
     # TODO: blocking opponent
     
     player_flat_stones = flatStoneDiff(board)
-    print(f'flatstone diff:{player_flat_stones}')
+    #print(f'flatstone diff:{player_flat_stones}')
     center_control = centerControl(board)
-    print(f'center control:{center_control}')
+    #print(f'center control:{center_control}')
     edge_control = edgeControl(board)
-    print(f'edge_control:{edge_control}')
+    #print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
     weight_longest_road = 5
@@ -198,16 +196,18 @@ def score(board):
 
 #TODO: FIX THE TODO IN FIND_MOVE_MINIMAX
 #helper function, it purpose is to make the initial call to the recursive function find_move_minimax and then return the result
-def find_best_move_minimax(board, valid_moves,):
+def find_best_move(board, valid_moves):
     global next_move
     next_move = None
     find_move_minimax(board, valid_moves, MAX_DEPTH, board.white_to_move())
+    #find_move_pruning(board, valid_moves, MAX_DEPTH, -WIN, WIN, 1 if board.white_to_move() else -1)
+
     return next_move
 
 #recursive function that finds the best move for the player
 def find_move_minimax(board, valid_moves, depth, white_to_move):    
 
-    print(f'valid moves: {valid_moves}')
+    #print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
@@ -243,3 +243,28 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
         
         return min_score
 
+def find_move_pruning(board, valid_moves, depth, alpha, beta, turn_multiplier):
+    global next_move
+    next_move = None
+
+    if depth == 0:
+        return score(board) * turn_multiplier
+    
+    #TODO: move ordering is important, cuz we wont have to evaluate abd moves if we find a better one. maybe moves with high longest road score should be evaluated first?
+    max_score = -WIN
+    for moves in valid_moves: # go through my moves
+        board = moves #do a move 
+        next_moves = getAllPossibleMoves(board, board.turn) # get my opponents moves
+        #reverse alphpa and beta, cuz for the opponent everything is reversed
+        current_score = -find_move_pruning(board, next_moves, depth - 1,-beta, -alpha, -turn_multiplier)#turn_multiplier is negative because we want to find the maximum score based on whoes turn it is
+        if current_score > max_score:
+            max_score = current_score
+            if depth == MAX_DEPTH:
+                next_move = moves
+
+        if max_score > alpha: #pruning
+            alpha = max_score
+        if alpha >= beta:
+            break
+
+    return max_score

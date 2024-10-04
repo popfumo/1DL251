@@ -1,6 +1,7 @@
 import unittest
 from gameAi import bestMove, longestRoad, centerControl, edgeControl, flatStoneDiff, score
 from board import Board, Player, Color, Location, Orientation, Piece
+from interaction_functions import place_piece
 
 class TestGameAi(unittest.TestCase):
 
@@ -43,13 +44,19 @@ class TestGameAi(unittest.TestCase):
 
     def test_flatStoneDiff(self):
         # Test flat stone differential calculation between two players
-        self.board.get_cell(Location(0, 1)).pieces.append(Piece(Location(0, 1), Orientation.HORIZONTAL, Color.BLACK))
-        self.board.get_cell(Location(0, 2)).pieces.append(Piece(Location(0, 2), Orientation.HORIZONTAL, Color.BLACK))
-        self.board.get_cell(Location(0, 3)).pieces.append(Piece(Location(0, 3), Orientation.HORIZONTAL, Color.BLACK))
-        self.board.get_cell(Location(0, 4)).pieces.append(Piece(Location(0, 4), Orientation.HORIZONTAL, Color.WHITE))
-        
-        diff = flatStoneDiff(self.board)
-        self.assertEqual(diff, -2)
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 1)
+        place_piece(player2.color, board, Location(2, 0), Orientation.HORIZONTAL)
+        assert (board.white_pieces_placed == 1)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 2)
+
+        diff = flatStoneDiff(board)
+        self.assertEqual(diff, -1)
 
     def test_score(self):
         # Test score calculation for player1

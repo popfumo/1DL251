@@ -162,6 +162,33 @@ class TestGame(unittest.TestCase):
         assert (len(possible_moves) == (25 + 25 + 4 + 4*4 + 4*4*4) - 4)
         
        
+    def test_piece_count(self):
+        # Test the number of pieces placed
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 1)
+        place_piece(player2.color, board, Location(2, 0), Orientation.HORIZONTAL)
+        assert (board.white_pieces_placed == 1)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 2)
+
+    def test_piece_count_with_getAllPossibleMoves(self):
+        # Test the number of pieces placed
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 1)
+        possible_moves = getAllPossibleMoves(board, player2.color)
+        board = possible_moves[0]
+        assert (board.white_pieces_placed == 1)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        assert (board.black_pieces_placed == 2)
+
 
 
 

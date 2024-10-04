@@ -21,6 +21,10 @@ def place_piece(player_color:Color, board, location, orientation):
         #player.pieces.insert(0, new_piece)
         #player.pieces_placed += 1
         board.get_cell(location).pieces.insert(0, new_piece)
+        if board.turn == Color.WHITE:
+            board.white_pieces_placed += 1
+        else:
+            board.black_pieces_placed += 1
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
         board.turn = board.turn.opposite()
         return True
@@ -61,7 +65,6 @@ def move_piece(player_color, board, old_location, new_location):
         return True
     else:
         return False
-
 
 # new_locations is an array containing coordinates to place the pieces in, the array is ordered from close to far
 def unload_cell(player, board, old_location, new_locations):
@@ -180,13 +183,13 @@ def getAllPossibleMoves(board : Board, player_color: Color):
                     # Our color is on top of this cell, meaning we can move as many pieces as we want in this stack.
                     # How many pieces do we want to move from the stack? This for loop iterates over the different possible amounts
                     x,y = cell.location.x, cell.location.y
-                    print(f"finding moves for Cell location: {x}, {y}")
+                    #print(f"finding moves for Cell location: {x}, {y}")
                     start_location = Location(x,y)
 
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
-                        print(f"num_pieces_to_move: {num_pieces_to_move}")
+                        #print(f"num_pieces_to_move: {num_pieces_to_move}")
                         new_boards.extend(get_all_possible_boards_after_stack_move(board, player_color, start_location, num_pieces_to_move))
-                        print(f"new_boards length: {len(new_boards)}")
+                        #print(f"new_boards length: {len(new_boards)}")
     return new_boards
 
 
@@ -219,8 +222,8 @@ def get_all_possible_boards_after_stack_move(board:Board, player_color,start_loc
 def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
         new_x, new_y = loc.x + dx, loc.y + dy
-        print(len(colors_of_pieces_to_move))
-        print(f'looking in direction {dx}, {dy}')
+        #print(len(colors_of_pieces_to_move))
+        #print(f'looking in direction {dx}, {dy}')
         if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure we're within board boundaries
             new_loc = Location(new_x, new_y)
             if placeable(board, new_loc):
@@ -228,7 +231,7 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 copy_colors_of_pieces_to_move = copy.deepcopy(colors_of_pieces_to_move)
                 new_piece = Piece(new_loc, Orientation.HORIZONTAL, copy_colors_of_pieces_to_move.pop(0))  # Create new piece
                 new_board.get_cell(new_loc).pieces.insert(0, new_piece) # Insert new piece into cell on new board
-                print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
+                #print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
                 # Do we have more pieces to move? if so do the recursive call
                 if len(copy_colors_of_pieces_to_move) > 0:
                     aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)

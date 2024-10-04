@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import copy
 
+
 from enum import Enum
 
 #The maximum number of pieces that can be placed
@@ -75,6 +76,9 @@ class Board:
 
         # As per game requirment, black goes first
         self.turn = Color.BLACK
+        self.white_pieces_placed = 0
+        self.black_pieces_placed = 0
+
     def __str__(self):
         string = ""
         for row in self.cells:
@@ -89,6 +93,8 @@ class Board:
         return copy.deepcopy(self)
     def white_to_move(self):
         return self.turn == Color.WHITE
+    def switch_turn(self):
+        self.turn = self.turn.opposite()
     
     def __eq__(self, value: object) -> bool:
         rval:bool = isinstance(value, Board)
