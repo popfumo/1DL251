@@ -112,6 +112,9 @@ class TestGame(unittest.TestCase):
         
         # Get all possible moves
         possible_moves = getAllPossibleMoves(board, player1.color)
+
+        print(possible_moves[-1])
+        print(possible_moves[-1].instructions)
         
         print(f'middle test possible moves: {len(possible_moves)}')
         

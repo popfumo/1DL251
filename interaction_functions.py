@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from board import Piece, Cell, Player, Board, Orientation, Color, Location
+from board import Piece, Cell, Player, Board, Orientation, Color, Location, place_move, move_instruction
 from game_logic import placeable, are_adjacent
 import copy
-
 
 num_pieces = 21
 
@@ -159,7 +158,7 @@ def getAllPossibleMoves(board : Board, player_color: Color):
     # this new_boards variable holds all the new boards that can be "made" by all the performing all possible moves
     # the idea is that we iterate over this when checking the score for each move, and then picking the board we want depending on the AI difficulty
     # not the most efficient approach with regards to performance, but i think it will do /edvin & viktor
-    new_boards = []
+    valid_moves:move_instruction = []
     for row in range(board.num_x):
         for col in range(board.num_y):
             cell = board.get_cell(Location(row, col)) # Get the cell at the current location
@@ -167,13 +166,14 @@ def getAllPossibleMoves(board : Board, player_color: Color):
             # Add all possible boards that can be created after placing a new piece.
             # If the cell is empty or has a horizontal piece on top, we can place a piece
             if cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL: 
-                new_horizontal_board: Board = board.copy()
-                place_piece(player_color, new_horizontal_board, Location(row,col), Orientation.HORIZONTAL)                
-                new_boards.append(new_horizontal_board)
 
-                new_vertical_board: Board = board.copy()
-                place_piece(player_color, new_vertical_board, Location(row,col), Orientation.VERTICAL)                
-                new_boards.append(new_vertical_board)
+                new_horizontal_move = place_move(player_color, Location(row, col), Orientation.HORIZONTAL)
+                new_horizontal_instruction = move_instruction(new_horizontal_move)
+                valid_moves.append(new_horizontal_instruction)
+                
+                new_vertical_move = place_move(player_color, Location(row, col), Orientation.VERTICAL)
+                new_vertical_instruction = move_instruction(new_vertical_move)
+                valid_moves.append(new_vertical_instruction)
 
             # Add all possible boards that can be created after moving a stack.
             # This is much more complex than placing a new piece, as the ways in which you can move a stack are much greater in numbers
@@ -188,9 +188,9 @@ def getAllPossibleMoves(board : Board, player_color: Color):
 
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
                         #print(f"num_pieces_to_move: {num_pieces_to_move}")
-                        new_boards.extend(get_all_possible_boards_after_stack_move(board, player_color, start_location, num_pieces_to_move))
+                        valid_moves.extend(get_all_possible_boards_after_stack_move(board, player_color, start_location, num_pieces_to_move))
                         #print(f"new_boards length: {len(new_boards)}")
-    return new_boards
+    return valid_moves
 
 
 # Returns a list of all possible boards that can be created after moving a stack of pieces
@@ -213,27 +213,49 @@ def get_all_possible_boards_after_stack_move(board:Board, player_color,start_loc
 
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
-    new_boards = []
-    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, new_boards)
-    return new_boards
+    instructions = []
+    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, instructions)
+    return instructions
+
+aux_inst_list = []
 
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
-def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
-    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
+def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list):
+    # Base case: If there are no more pieces to move, save the instruction sequence and return
+    if not colors_of_pieces_to_move:
+        instructions.append(aux_inst_list[:])  # Save a deep copy of the current move list
+        return
+
+    # Loop through possible directions (up, down, left, right)
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         new_x, new_y = loc.x + dx, loc.y + dy
-        #print(len(colors_of_pieces_to_move))
-        #print(f'looking in direction {dx}, {dy}')
-        if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure we're within board boundaries
+        if 0 <= new_x < 5 and 0 <= new_y < 5:  # Ensure the move is within boundaries
             new_loc = Location(new_x, new_y)
-            if placeable(board, new_loc):
-                new_board = board.copy() # create new board copy
-                copy_colors_of_pieces_to_move = copy.deepcopy(colors_of_pieces_to_move)
-                new_piece = Piece(new_loc, Orientation.HORIZONTAL, copy_colors_of_pieces_to_move.pop(0))  # Create new piece
-                new_board.get_cell(new_loc).pieces.insert(0, new_piece) # Insert new piece into cell on new board
-                #print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
-                # Do we have more pieces to move? if so do the recursive call
-                if len(copy_colors_of_pieces_to_move) > 0:
-                    aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
-                else: 
-                    new_boards.append(new_board)
+            if placeable(board, new_loc):  # Check if placing a piece is allowed
+                # Create a new piece and add it to the board
+                new_piece = Piece(new_loc, Orientation.HORIZONTAL, colors_of_pieces_to_move[0])  
+                piece_to_save = place_move(new_piece.color, new_loc, new_piece.orientation)
+                
+                # Insert the piece into the board cell and update the move list
+                board.get_cell(new_loc).pieces.insert(0, new_piece)
+                aux_inst_list.append(piece_to_save)
+                
+                # Recursive call with the remaining pieces (excluding the one just placed)
+                aux_get_all_PBASM(board, new_loc, colors_of_pieces_to_move[1:], instructions)
+                
+                # Backtrack: Remove the last piece and undo the move
+                aux_inst_list.pop()
+                board.get_cell(new_loc).pieces.remove(new_piece)
+
+# This is an auxilary function that is used in get_all_possible_boards_after_stack_move(), instead 
+# of copying the board for each move, we will use this function to make the move and then undo it
+def aux_undo(board: Board, instruction: place_move):
+    if instruction != None:
+        board.get_cell(instruction.location).remove_top_piece()
+        return True
+    else:
+        to_remove = board.latest_move
+        for i in range(len(to_remove)):
+            board.get_cell(to_remove[i].location).remove_top_piece()
+        return True 

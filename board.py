@@ -18,7 +18,6 @@ class Orientation(Enum):
     VERTICAL = 2
 
 
-
 # Initializes a cell with a empty list of pieces
 class Cell:
     def __init__(self, x, y):
@@ -54,6 +53,16 @@ class Location:
     def __hash__(self):
         return hash((self.x, self.y))
 
+class place_move:
+    def __init__(self, piece_color:Color, location:Location, orientation:Orientation):
+        self.piece_color = piece_color
+        self.location = location
+        self.orientation = orientation
+        
+class move_instruction:
+        def __init__(self, instructions:place_move):
+            self.instructions = instructions
+    
 
 # Initializes a player with 0 pieces placed so far
 class Player:
@@ -78,6 +87,8 @@ class Board:
         self.turn = Color.BLACK
         self.white_pieces_placed = 0
         self.black_pieces_placed = 0
+        # Only to be used by AI
+        self.latest_move = None
 
     def __str__(self):
         string = ""
