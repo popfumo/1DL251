@@ -104,7 +104,8 @@ class Board:
         self.black_pieces_placed = 0
 
         # Only to be used by AI
-        self.latest_move:move_instruction = None
+        self.latest_move_white:move_instruction = None
+        self.latest_move_black:move_instruction = None
 
     def __str__(self):
         string = ""

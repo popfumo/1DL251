@@ -170,17 +170,17 @@ def score(board):
     
     # Calculate each criterion for the player and opponent
     player_longest_road = longestRoad(board)
-    #print(f'longest road:{player_longest_road}')
+    ##print(f'longest road:{player_longest_road}')
     
     # TODO: Calculate extention potential
     # TODO: blocking opponent
     
     player_flat_stones = flatStoneDiff(board)
-    #print(f'flatstone diff:{player_flat_stones}')
+    ##print(f'flatstone diff:{player_flat_stones}')
     center_control = centerControl(board)
-    #print(f'center control:{center_control}')
+    ##print(f'center control:{center_control}')
     edge_control = edgeControl(board)
-    #print(f'edge_control:{edge_control}')
+    ##print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
     weight_longest_road = 5
@@ -209,7 +209,7 @@ def find_best_move(board, valid_moves):
 #recursive function that finds the best move for the player
 def find_move_minimax(board, valid_moves, depth, white_to_move):    
 
-    #print(f'valid moves: {valid_moves}')
+    ##print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
@@ -230,6 +230,9 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 if depth == MAX_DEPTH: 
                     next_move = move
             
+            #print('board from minimax from white: ')
+            #print(board)
+            #print(f'turn: {board.turn}')
             undo_move(board)
         return max_score
 
@@ -245,6 +248,9 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 if depth == MAX_DEPTH:
                     next_move = move
 
+            #print('bord in minimax from black: ')
+            #print(board)
+            #print(f'turn: {board.turn}')
             undo_move(board)
         return min_score
 

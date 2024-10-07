@@ -59,7 +59,7 @@ def game():
 
         possible_moves = getAllPossibleMoves(board, current_player.color)
         best_move = bestMove(board, possible_moves, difficulty)
-        print(f'Best move: {best_move}')
+        #print(f'Best move: {best_move}')
         make_move_ai(board, best_move)
 
         # if check_win(board, current_player.color):

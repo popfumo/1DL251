@@ -167,16 +167,26 @@ def make_move_ai(board: Board, valid_moves: move_instruction):
             inst.append(new_piece)
             board.get_cell(start_piece.location).remove_top_piece() 
         
-        board.latest_move = inst
+        if board.white_to_move(): 
+            board.latest_move_white= inst
+        else:
+            board.latest_move_black = inst
+
         board.turn = board.turn.opposite()
+        
         return True
     
     else:  # It is a place instruction
+        if board.white_to_move(): 
+            board.latest_move_white= valid_moves
+        else:
+            board.latest_move_black = valid_moves
+
         color = valid_moves.instructions.color
         location = valid_moves.instructions.location
         orientation = valid_moves.instructions.orientation
         place_piece(color, board, location, orientation)
-        board.latest_move = valid_moves
+        
         # Tror den tar bara en instruktion
         return False
     
@@ -202,7 +212,7 @@ def getAllPossibleMoves(board : Board, player_color: Color):
                 new_horizontal_instruction = move_instruction(new_horizontal_move)
                 valid_moves.append(new_horizontal_instruction)
                 
-                new_vertical_move = Piece(Location(row, col), Orientation.HORIZONTAL, player_color)
+                new_vertical_move = Piece(Location(row, col), Orientation.VERTICAL, player_color)
                 new_vertical_instruction = move_instruction(new_vertical_move)
                 valid_moves.append(new_vertical_instruction)
 
@@ -278,14 +288,22 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move(), instead 
 # of copying the board for each move, we will use this function to make the move and then undo it
 def undo_move(board: Board):
-    instruction = board.latest_move
+    #print(f'undo turn, current turn: {board.turn}')
+    
+    if board.white_to_move():
+        instruction = board.latest_move_white
+    else:  
+        instruction = board.latest_move_black
 
     if isinstance(instruction, list): #if it is a list it is a move instruction
         for i in range(len(instruction)):
-            piece:Piece = instruction.instructions[i]
+            piece:Piece = instruction[i]
             board.get_cell(piece.location).remove_top_piece()
             #print(f"Undoing move: {piece.location}")
-        board.latest_move = None
+        if board.white_to_move():
+            board.latest_move_white = None
+        else:  
+            board.latest_move_black = None
 
         return True 
     else: #otherwise it is a place instruction
@@ -296,7 +314,11 @@ def undo_move(board: Board):
             board.white_pieces_placed -= 1
         else:    
             board.black_pieces_placed -= 1
-        board.latest_move = None
+        
+        if board.white_to_move():
+            board.latest_move_white = None
+        else:  
+            board.latest_move_black = None
         #print(f"Undoing move: {piece.location}")
         return True
     
