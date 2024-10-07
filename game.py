@@ -1,5 +1,5 @@
 from board import Board, Player, Color, Location, Orientation
-from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, getAllPossibleMoves
+from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, getAllPossibleMoves, make_move_ai
 from game_logic import check_win
 from gameAi import setDifficulty, bestMove
 
@@ -59,11 +59,12 @@ def game():
 
         possible_moves = getAllPossibleMoves(board, current_player.color)
         best_move = bestMove(board, possible_moves, difficulty)
-        board = best_move
+        print(f'Best move: {best_move}')
+        make_move_ai(board, best_move)
 
-        if check_win(board, current_player.color):
-          print(f"{current_player.color.name} wins!")
-          break
+        # if check_win(board, current_player.color):
+        #   print(f"{current_player.color.name} wins!")
+        #   break
 
         current_player = player2 if current_player == player1 else player1
 

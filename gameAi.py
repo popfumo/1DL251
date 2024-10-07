@@ -1,7 +1,7 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation, check_win
 from board import Player, Color, Board
-from interaction_functions import getAllPossibleMoves 
+from interaction_functions import getAllPossibleMoves, make_move_ai, undo_move
 import threading
 
 
@@ -34,11 +34,13 @@ def bestMove(board,validMoves, difficulty):
         return random.choice(validMoves)
     
     elif difficulty == "medium":
-        thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
+        #thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
         
-        thread.start()
+        #thread.start()
         
-        thread.join()
+        #thread.join()
+
+        find_best_move(board, validMoves)
         
         return next_move
     
@@ -219,7 +221,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
         max_score = -WIN
 
         for move in valid_moves:
-            board = move
+            make_move_ai(board, move)
             next_moves = getAllPossibleMoves(board, Color.BLACK) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
             #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
             current_score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
@@ -227,20 +229,23 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 max_score = current_score
                 if depth == MAX_DEPTH: 
                     next_move = move
+            
+            undo_move(board)
         return max_score
 
     else:
         min_score = WIN
 
         for move in valid_moves:
-            board = move
+            make_move_ai(board, move)
             next_moves = getAllPossibleMoves(board, Color.WHITE)
             current_score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
             if current_score < min_score:
                 min_score = current_score
                 if depth == MAX_DEPTH:
                     next_move = move
-        
+
+            undo_move(board)
         return min_score
 
 def find_move_pruning(board, valid_moves, depth, alpha, beta, turn_multiplier):

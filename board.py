@@ -58,9 +58,24 @@ class place_move:
         self.piece_color = piece_color
         self.location = location
         self.orientation = orientation
-        
+
+class Piece:
+    def __init__(self, location: Location, orientation: Orientation, color: Color):
+        self.location = location
+        self.orientation = orientation
+        self.color = color
+    def __repr__(self):
+        return f"{self.location} {self.orientation}"
+    
+    def __eq__(self, other):
+        if isinstance(other, Piece):
+            return (self.location == other.location and
+                    self.orientation == other.orientation and
+                    self.color == other.color)
+    
+
 class move_instruction:
-        def __init__(self, instructions:place_move):
+        def __init__(self, instructions:Piece):
             self.instructions = instructions
     
 
@@ -87,8 +102,9 @@ class Board:
         self.turn = Color.BLACK
         self.white_pieces_placed = 0
         self.black_pieces_placed = 0
+
         # Only to be used by AI
-        self.latest_move = None
+        self.latest_move:move_instruction = None
 
     def __str__(self):
         string = ""
@@ -98,8 +114,7 @@ class Board:
             string += "\n"
         return string
     # Returns the pieces in a cell
-    def get_cell(self, location):
-        return self.cells[location.x][location.y]
+    def get_cell(self, location):        return self.cells[location.x][location.y]
     def copy(self):
         return copy.deepcopy(self)
     def white_to_move(self):
@@ -114,10 +129,3 @@ class Board:
                 rval = rval and self.cells[x][y].pieces == value.cells[x][y].pieces
         return rval         
 
-class Piece:
-    def __init__(self, location, orientation, color):
-        self.location = location
-        self.orientation = orientation
-        self.color = color
-    def __repr__(self):
-        return f"{self.location} {self.orientation}"

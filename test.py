@@ -158,7 +158,7 @@ class TestGame(unittest.TestCase):
         # Get all possible moves
         possible_moves = getAllPossibleMoves(board, player1.color)
 
-        print(f'possible moves: {len(possible_moves)}')
+        print(f'board: {board}')
         
         # Assert the number of possible moves
         # 25 flat placements, 25 standing placements, 4 (move 1) + 4*4 (move 2) + 4*4*4 (move 3) - 4 because we hit the edge of the board 4 times when moving 3, piece-movements available
