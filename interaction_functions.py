@@ -31,24 +31,6 @@ def place_piece(player_color:Color, board, location, orientation):
         print(f"Cannot place piece at {location}")
         return False
     
-"""
-def place_piece(player, board, location, orientation):
-    if player.pieces_placed < num_pieces: 
-        if placeable(board, location):
-            new_piece = Piece(location, orientation, player.color)  # Use player.color instead of player
-            player.pieces.insert(0, new_piece)
-            player.pieces_placed += 1
-            board.get_cell(location).pieces.insert(0, new_piece)
-            #print(f"Piece placed at {location} with color {player.color}")  # Debug print
-            return True
-        else:
-            print(f"Cannot place piece at {location}")
-            return False
-    else:    
-        print("No more pieces left")
-        return False
-"""
-
 # Moves a piece to a new location. Returns True if the piece was moved, False otherwise
 # Checks if the piece can be placed in the new location by looking at the top piece of the cell at the new location
 def move_piece(player_color, board, old_location, new_location):
@@ -153,7 +135,7 @@ def circle_condtion(player, board, location):
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
 def make_move_ai(board: Board, valid_moves: move_instruction):
     if isinstance(valid_moves, list): # It is a move instruction
-        inst:move_instruction = []
+        inst = []
 
         start_piece = valid_moves[0]
 
@@ -167,21 +149,13 @@ def make_move_ai(board: Board, valid_moves: move_instruction):
             inst.append(new_piece)
             board.get_cell(start_piece.location).remove_top_piece() 
         
-        if board.white_to_move(): 
-            board.latest_move_white= inst
-        else:
-            board.latest_move_black = inst
-
+        board.latest_move.append(inst)
         board.turn = board.turn.opposite()
         
         return True
     
     else:  # It is a place instruction
-        if board.white_to_move(): 
-            board.latest_move_white= valid_moves
-        else:
-            board.latest_move_black = valid_moves
-
+        board.latest_move.append(valid_moves)
         color = valid_moves.instructions.color
         location = valid_moves.instructions.location
         orientation = valid_moves.instructions.orientation
@@ -285,25 +259,16 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 aux_inst_list.pop()
                 board.get_cell(new_loc).pieces.remove(new_piece)
 
-# This is an auxilary function that is used in get_all_possible_boards_after_stack_move(), instead 
-# of copying the board for each move, we will use this function to make the move and then undo it
+#This function is used to undo the latest move the AI has made.
 def undo_move(board: Board):
     #print(f'undo turn, current turn: {board.turn}')
-    
-    if board.white_to_move():
-        instruction = board.latest_move_white
-    else:  
-        instruction = board.latest_move_black
+    instruction = board.latest_move.pop()
 
     if isinstance(instruction, list): #if it is a list it is a move instruction
         for i in range(len(instruction)):
             piece:Piece = instruction[i]
             board.get_cell(piece.location).remove_top_piece()
             #print(f"Undoing move: {piece.location}")
-        if board.white_to_move():
-            board.latest_move_white = None
-        else:  
-            board.latest_move_black = None
 
         return True 
     else: #otherwise it is a place instruction
@@ -315,10 +280,5 @@ def undo_move(board: Board):
         else:    
             board.black_pieces_placed -= 1
         
-        if board.white_to_move():
-            board.latest_move_white = None
-        else:  
-            board.latest_move_black = None
-        #print(f"Undoing move: {piece.location}")
         return True
     

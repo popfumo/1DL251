@@ -5,6 +5,14 @@ from interaction_functions import getAllPossibleMoves, make_move_ai, undo_move
 import threading
 
 
+#############################################################################################
+# NOTE: Possible buggs and fixed that are needed as of 8/10
+# Bug kepping count of pieces placed, origin prob undo_move
+# Bug when playing the AI deleted some of there pieces and did not place any new, prob bug in move or undo
+# The AI almost always begins with a blocking piece, weird behaviour, fix score function
+#############################################################################################
+
+
 WIN = 10000
 
 MAX_DEPTH = 2 #this needs to be changed per difficulty but it is global for ease of development
