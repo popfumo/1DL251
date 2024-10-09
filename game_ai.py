@@ -1,8 +1,16 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation, check_win
 from board import Player, Color, Board
-from interaction_functions import get_all_possible_moves 
+from interaction_functions import get_all_possible_moves, make_move_ai, undo_move
 import threading
+
+
+#############################################################################################
+# NOTE: Possible buggs and fixed that are needed as of 8/10
+# Bug kepping count of pieces placed, origin prob undo_move
+# Bug when playing the AI deleted some of there pieces and did not place any new, prob bug in move or undo
+# The AI almost always begins with a blocking piece, weird behaviour, fix score function
+#############################################################################################
 
 
 WIN = 10000
@@ -27,24 +35,26 @@ def set_difficulty():
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
-def best_move(valid_moves, difficulty):
+def best_move(board,valid_moves, difficulty):
     
     if difficulty == "easy":
         # Randomly select a move from the valid moves
         return random.choice(valid_moves)
     
     elif difficulty == "medium":
-        thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
+        #thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
         
-        thread.start()
+        #thread.start()
         
-        thread.join()
+        #thread.join()
+
+        find_best_move(board, valid_moves)
         
         return next_move
     
     elif difficulty == "hard":
 
-        find_best_move(board, validMoves)
+        find_best_move(board, valid_moves)
 
         return next_move
 
@@ -84,8 +94,8 @@ def longest_road(board):
 #Number of adjecent squares where the player can extend their road
 def potential_road_extensions(board, player):
     return 0
-                    
-def flat_stone_diff(board):
+
+def flat_stone_diff(board:Board):
     """
     Calculates the flat stone differential between the player and the opponent.
     FSD criteria. Does not take into consideration stacks.
@@ -168,17 +178,17 @@ def score(board):
     
     # Calculate each criterion for the player and opponent
     player_longest_road = longest_road(board)
-    #print(f'longest road:{player_longest_road}')
+    ##print(f'longest road:{player_longest_road}')
     
     # TODO: Calculate extention potential
     # TODO: blocking opponent
     
     player_flat_stones = flat_stone_diff(board)
-    #print(f'flatstone diff:{player_flat_stones}')
+    ##print(f'flatstone diff:{player_flat_stones}')
     the_center_control = center_control(board)
-    #print(f'center control:{center_control}')
+    ##print(f'center control:{center_control}')
     the_edge_control = edge_control(board)
-    #print(f'edge_control:{edge_control}')
+    ##print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
     weight_longest_road = 5
@@ -207,7 +217,7 @@ def find_best_move(board, valid_moves):
 #recursive function that finds the best move for the player
 def find_move_minimax(board, valid_moves, depth, white_to_move):    
 
-    #print(f'valid moves: {valid_moves}')
+    ##print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
@@ -219,7 +229,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
         max_score = -WIN
 
         for move in valid_moves:
-            board = move
+            make_move_ai(board, move)
             next_moves = get_all_possible_moves(board, Color.BLACK) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
             #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
             current_score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
@@ -227,20 +237,29 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 max_score = current_score
                 if depth == MAX_DEPTH: 
                     next_move = move
+            
+            #print('board from minimax from white: ')
+            #print(board)
+            #print(f'turn: {board.turn}')
+            undo_move(board)
         return max_score
 
     else:
         min_score = WIN
 
         for move in valid_moves:
-            board = move
+            make_move_ai(board, move)
             next_moves = get_all_possible_moves(board, Color.WHITE)
             current_score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
             if current_score < min_score:
                 min_score = current_score
                 if depth == MAX_DEPTH:
                     next_move = move
-        
+
+            #print('bord in minimax from black: ')
+            #print(board)
+            #print(f'turn: {board.turn}')
+            undo_move(board)
         return min_score
 
 def find_move_pruning(board, valid_moves, depth, alpha, beta, turn_multiplier):

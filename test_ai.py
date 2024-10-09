@@ -12,7 +12,7 @@ class TestGameAi(unittest.TestCase):
         self.player2 = Player(Color.WHITE)
 
     def test_best_move_easy(self):
-        # Test bestMove for easy difficulty (random move)
+        # Test best_move for easy difficulty (random move)
         valid_moves = [('place', 1, 1, Orientation.HORIZONTAL), ('place', 2, 2, Orientation.VERTICAL)]
         move = best_move(valid_moves, 'easy')
         self.assertIn(move, valid_moves)
@@ -106,7 +106,7 @@ class TestGameAi(unittest.TestCase):
         player2 = Player(Color.WHITE)
 
         place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
-        possible_moves = getAllPossibleMoves(board, player2.color)
+        possible_moves = get_all_possible_moves(board, player2.color)
         move = possible_moves[0]
         make_move_ai(board, move)
         assert (board.white_pieces_placed == 1)
@@ -118,7 +118,7 @@ class TestGameAi(unittest.TestCase):
     #     player2 = Player(Color.WHITE)
 
     #     place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
-    #     possible_moves = getAllPossibleMoves(board, player2.color)
+    #     possible_moves = get_all_possible_moves(board, player2.color)
     #     move = possible_moves[0]
     #     make_move_ai(board, move)
     #     assert (board.white_pieces_placed == 1)
@@ -128,7 +128,7 @@ class TestGameAi(unittest.TestCase):
     #     assert (board.get_cell(Location(0, 0)).is_empty())
     #     assert (board.latest_move == None)
     #     place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
-    #     move2 = getAllPossibleMoves(board, player2.color)
+    #     move2 = get_all_possible_moves(board, player2.color)
     #     some_move = move2[24]
     #     make_move_ai(board, some_move)
     #     assert (board.white_pieces_placed == 1)
@@ -147,8 +147,8 @@ class TestGameAi(unittest.TestCase):
         print('board from test:')
         print(board)
         print(f'board from test, turn: {board.turn}, should be white')
-        possible_moves = getAllPossibleMoves(board, player2.color)
-        move = bestMove(board, possible_moves, 'medium')
+        possible_moves = get_all_possible_moves(board, player2.color)
+        move = best_move(board, possible_moves, 'medium')
         make_move_ai(board, move)
     
         assert (board.white_pieces_placed == 1)
