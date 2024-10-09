@@ -4,7 +4,7 @@ from board import Piece, Cell, Player, Board, Orientation, Color, Location, plac
 from game_logic import placeable, are_adjacent
 import copy
 
-num_pieces = 21
+NUM_PIECES = 21
 
 # Places a piece in a cell, returns True if the piece was placed, False otherwise
 # piece is placed at the front of the array
@@ -165,7 +165,7 @@ def make_move_ai(board: Board, valid_moves: move_instruction):
         return False
     
 
-def getAllPossibleMoves(board : Board, player_color: Color):
+def get_all_possible_moves(board : Board, player_color: Color):
     """
     This function will create a list of boards, it will take the current board and make a copy of it, 
     it will then create a new board for each possible move that can be made and append to a list.
@@ -209,7 +209,7 @@ def getAllPossibleMoves(board : Board, player_color: Color):
 
 # Returns a list of all possible boards that can be created after moving a stack of pieces
 # num_pieces_to_move is the number of pieces to move from the stack
-# This function is called by getAllPossibleMoves()
+# This function is called by get_all_possible_moves()
 def get_all_possible_boards_after_stack_move(board:Board, player_color,start_location: Location, num_pieces_to_move: int):
     assert num_pieces_to_move > 0
     start_cell: Cell = board.get_cell(start_location)
@@ -227,7 +227,7 @@ def get_all_possible_boards_after_stack_move(board:Board, player_color,start_loc
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
     instructions = []
-    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece())
+    aux_get_all_pbasm(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece())
     return instructions
 
 aux_inst_list = []
@@ -235,7 +235,7 @@ aux_inst_list = []
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
 #it will return a list with first the stacks start piece and then the instructions to move the pieces
-def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece):
+def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece):
     
     if not colors_of_pieces_to_move:
         instruction = [top_piece] + aux_inst_list
@@ -254,7 +254,7 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 board.get_cell(new_loc).pieces.insert(0, new_piece)
                 aux_inst_list.append(new_piece)
                 
-                aux_get_all_PBASM(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece)
+                aux_get_all_pbasm(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece)
                 
                 aux_inst_list.pop()
                 board.get_cell(new_loc).pieces.remove(new_piece)

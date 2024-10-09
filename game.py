@@ -1,7 +1,7 @@
 from board import Board, Player, Color, Location, Orientation
-from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, getAllPossibleMoves, make_move_ai
+from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, get_all_possible_moves, make_move_ai
 from game_logic import check_win
-from gameAi import setDifficulty, bestMove
+from game_ai import set_difficulty, best_move
 
 '''
 Init:
@@ -21,7 +21,7 @@ def game():
     player2 = Player(Color.WHITE)
     current_player = player1  # Black goes first
     
-    difficulty = setDifficulty()
+    difficulty = set_difficulty()
 
     # Main game loop
     while True:
@@ -57,10 +57,10 @@ def game():
         # Switch to the other player
         current_player = player2 if current_player == player1 else player1
 
-        possible_moves = getAllPossibleMoves(board, current_player.color)
-        best_move = bestMove(board, possible_moves, difficulty)
+        possible_moves = get_all_possible_moves(board, current_player.color)
+        the_best_move = best_move(board, possible_moves, difficulty)
         #print(f'Best move: {best_move}')
-        make_move_ai(board, best_move)
+        make_move_ai(board, the_best_move)
 
         # if check_win(board, current_player.color):
         #   print(f"{current_player.color.name} wins!")
