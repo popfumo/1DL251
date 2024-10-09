@@ -5,7 +5,7 @@ from game_logic import placeable, are_adjacent
 import copy
 
 
-num_pieces = 21
+NUM_PIECES = 21
 
 # Places a piece in a cell, returns True if the piece was placed, False otherwise
 # piece is placed at the front of the array
@@ -22,6 +22,7 @@ def place_piece(player, board, location, orientation):
         player.pieces_placed += 1
         board.get_cell(location).pieces.insert(0, new_piece)
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
+        board.turn = board.turn.opposite()
         return True
     else:
         print(f"Cannot place piece at {location}")
@@ -56,6 +57,7 @@ def move_piece(player, board, old_location, new_location):
         piece_to_move = board.get_cell(top_piece.location).remove_top_piece()
         piece_to_move.location = new_location
         board.get_cell(new_location).pieces.insert(0, piece_to_move)
+        board.turn = board.turn.opposite()
         return True
     else:
         return False
@@ -74,7 +76,7 @@ def unload_cell(player, board, old_location, new_locations):
             for location in new_locations:
                 current_piece = board.get_cell(old_location).remove_top_piece()
                 board.get_cell(location).pieces.insert(0, current_piece)
-             
+            board.turn = board.turn.opposite()
             return True
         else:
             print("Cannot unload piece because the top piece is not the player's piece")
@@ -125,6 +127,7 @@ def unload_piece_recursive(player, board, num_remove, original_location, current
                 if num_remove > 1:
                     return unload_piece_recursive(player, board, num_remove - 1, original_location, new_location)
                 else:
+                    board.turn = board.turn.opposite()
                     return True
             else:
                 print("Cannot place piece in that direction. Try again.")
@@ -145,7 +148,7 @@ def circle_condtion(player, board, location):
     return 0
 
 
-def getAllPossibleMoves(board : Board, player: Player):
+def get_all_possible_moves(board : Board, player: Player):
     """
     This function will create a list of boards, it will take the current board and make a copy of it, 
     it will then create a new board for each possible move that can be made and append to a list.
@@ -207,12 +210,12 @@ def get_all_possible_boards_after_stack_move(board:Board, player: Player,start_l
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
     new_boards = []
-    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, new_boards)
+    aux_get_all_pbasm(board, start_location, colors_of_pieces_to_move, new_boards)
     return new_boards
 
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
-def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
+def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
         new_x, new_y = loc.x + dx, loc.y + dy
         print(len(colors_of_pieces_to_move))
@@ -226,18 +229,11 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
                 # Do we have more pieces to move? if so do the recursive call
                 if len(copy_colors_of_pieces_to_move) > 0:
-                    aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
+                    aux_get_all_pbasm(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
                 else: 
                     new_boards.append(new_board)
             
     
 
 
-def test():
-    p1_color = Color.BLACK
-    p2_color = Color.WHITE
-    player1 = Player(p1_color)
-    player2 = Player(p2_color)
-    b = Board()
-    
 

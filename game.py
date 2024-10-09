@@ -1,7 +1,7 @@
 from board import Board, Player, Color, Location, Orientation
-from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, getAllPossibleMoves
+from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, get_all_possible_moves
 from game_logic import check_win
-from gameAi import setDifficulty, bestMove
+from game_ai import set_difficulty, best_move
 
 '''
 Init:
@@ -21,13 +21,13 @@ def game():
     player2 = Player(Color.WHITE)
     current_player = player1  # Black goes first
     
-    difficulty = setDifficulty()
+    difficulty = set_difficulty()
 
     # Main game loop
     while True:
         # Display the current board state
         print(board)
-        
+        print(board.turn)
         # Get player's move
         move = get_player_move(current_player, board)
 
@@ -48,7 +48,7 @@ def game():
         if check_win(board, current_player):
             print(f"{current_player.color.name} wins!")
             break
-
+        print(board.turn)
         # Check for a stalemate (you'll need to implement this function) TODO
         #if is_stalemate(board):
         #    print("The game is a draw.")
@@ -57,8 +57,8 @@ def game():
         # Switch to the other player
         current_player = player2 if current_player == player1 else player1
 
-        possible_moves = getAllPossibleMoves(board, current_player)
-        best_move = bestMove(possible_moves, difficulty)
+        possible_moves = get_all_possible_moves(board, current_player)
+        best_move = best_move(possible_moves, difficulty)
         board = best_move
 
         if check_win(board, current_player):
