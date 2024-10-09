@@ -2,7 +2,7 @@ import random
 from game_logic import find_connected_pieces, Location, Orientation
 from board import Player, Color, Board 
 
-def setDifficulty():
+def set_difficulty():
     """
     Prompts the user to choose the AI difficulty level.
     Returns the selected difficulty as a string: 'easy', 'medium', or 'hard'.
@@ -15,11 +15,11 @@ def setDifficulty():
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
-def bestMove(validMoves, difficulty):
+def best_move(valid_moves, difficulty):
     
     if difficulty == "easy":
         # Randomly select a move from the valid moves
-        return random.choice(validMoves)
+        return random.choice(valid_moves)
     
     # TODO: return minimax function with depth 1
     elif difficulty == "medium":
@@ -39,7 +39,7 @@ def bestMove(validMoves, difficulty):
 #   BLACK wants to minimize                     #
 #################################################
 
-def longestRoad(board):
+def longest_road(board):
     """
     Finds and returns the length of the longest road (horizontal or vertical connection).
 
@@ -67,10 +67,10 @@ def longestRoad(board):
     return longest_road_score
 
 #Number of adjecent squares where the player can extend their road
-def potentialRoadExtensions(board, player):
+def potential_road_extensions(board, player):
     return 0
                     
-def flatStoneDiff(board):
+def flat_stone_diff(board):
     """
     Calculates the flat stone differential between the player and the opponent.
     FSD criteria.
@@ -95,7 +95,7 @@ def flatStoneDiff(board):
 
     return placement_score
 
-def centerControl(board):
+def center_control(board):
     """
     Calculates how many center squares the player controls. Center control criteria.
 
@@ -117,7 +117,7 @@ def centerControl(board):
 
     return center_score
 
-def edgeControl(board):
+def edge_control(board):
     """
     Calculates how many edge squares the player controls. Edge control criteria.
 
@@ -158,17 +158,17 @@ def score(board):
     board_score = 0
     
     # Calculate each criterion for the player and opponent
-    player_longest_road = longestRoad(board)
+    player_longest_road = longest_road(board)
     print(f'longest road:{player_longest_road}')
     
     # TODO: Calculate extention potential
     # TODO: blocking opponent
     
-    player_flat_stones = flatStoneDiff(board)
+    player_flat_stones = flat_stone_diff(board)
     print(f'flatstone diff:{player_flat_stones}')
-    center_control = centerControl(board)
+    center_control = center_control(board)
     print(f'center control:{center_control}')
-    edge_control = edgeControl(board)
+    edge_control = edge_control(board)
     print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
@@ -186,7 +186,7 @@ def score(board):
     return board_score
 
 
-def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):
+def minimax(curr_depth, node_index, max_turn, scores, target_depth):
     """
     Recursive implementation of the Minimax algorithm.
 
@@ -202,14 +202,14 @@ def miniMax(currDepth, nodeIndex, maxTurn, scores, targetDepth):
     """
 
     # Base case
-    if (currDepth == targetDepth):
-        return scores[nodeIndex]
+    if (curr_depth == target_depth):
+        return scores[node_index]
     
     # Maxing player turn
-    if maxTurn:
-        return max(miniMax(currDepth + 1, nodeIndex * 2, False, scores, targetDepth)
-                   ,miniMax(currDepth + 1, nodeIndex * 2 + 1, False, scores, targetDepth))
+    if max_turn:
+        return max(minimax(curr_depth + 1, node_index * 2, False, scores, target_depth)
+                   ,minimax(curr_depth + 1, node_index * 2 + 1, False, scores, target_depth))
     # Min player turn
     else:
-        return min(miniMax(currDepth + 1, nodeIndex * 2, False, scores, targetDepth)
-                   ,miniMax(currDepth + 1, nodeIndex * 2 + 1, False, scores, targetDepth))
+        return min(minimax(curr_depth + 1, node_index * 2, False, scores, target_depth)
+                   ,minimax(curr_depth + 1, node_index * 2 + 1, False, scores, target_depth))

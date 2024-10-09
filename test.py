@@ -3,8 +3,8 @@ from unittest.mock import patch
 from io import StringIO
 from board import Board, Player, Color, Location, Orientation, Piece
 from game import game
-from interaction_functions import place_piece, unload_piece_recursive, getAllPossibleMoves
-from gameAi import longestRoad
+from interaction_functions import place_piece, unload_piece_recursive, get_all_possible_moves
+from game_ai import longest_road
 
 class TestGame(unittest.TestCase):
     def setUp(self):
@@ -73,7 +73,7 @@ class TestGame(unittest.TestCase):
         self.assertIn("Attempting to unload from location: 0, 0", output)
         self.assertNotIn("The top piece in this cell is not yours.", output)
 
-    def test_longest_road_for_WHITE(self):
+    def test_longest_road_for_white(self):
         # Test longest road calculation
         place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
         place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
@@ -85,10 +85,10 @@ class TestGame(unittest.TestCase):
         place_piece(self.player2, self.board, Location(3, 0), Orientation.HORIZONTAL)
         place_piece(self.player2, self.board, Location(4, 0), Orientation.HORIZONTAL)
 
-        longest_road_p1 = longestRoad(self.board)
+        longest_road_p1 = longest_road(self.board)
         self.assertEqual(longest_road_p1, 5)
 
-    def test_longest_road_for_BLACK(self):
+    def test_longest_road_for_black(self):
         # Test longest road calculation
         place_piece(self.player1, self.board, Location(0, 1), Orientation.HORIZONTAL)
         place_piece(self.player1, self.board, Location(0, 2), Orientation.HORIZONTAL)
@@ -97,10 +97,10 @@ class TestGame(unittest.TestCase):
         place_piece(self.player2, self.board, Location(0, 0), Orientation.HORIZONTAL)
         place_piece(self.player2, self.board, Location(1, 0), Orientation.HORIZONTAL)
 
-        longest_road_p1 = longestRoad(self.board)
+        longest_road_p1 = longest_road(self.board)
         self.assertEqual(longest_road_p1, -4)
     
-    def test_getAllPossibleMoves(self):
+    def test_get_all_possible_moves(self):
         # Create a board with some initial pieces
         board = Board()
         player1 = Player(Color.BLACK)
@@ -111,7 +111,7 @@ class TestGame(unittest.TestCase):
         place_piece(player1, board, Location(0, 0), Orientation.HORIZONTAL)
         
         # Get all possible moves
-        possible_moves = getAllPossibleMoves(board, player1)
+        possible_moves = get_all_possible_moves(board, player1)
         
         # Assert the number of possible moves
 
