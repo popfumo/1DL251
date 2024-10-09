@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from board import Piece, Cell, Player, Board, Orientation, Color, Location, place_move, move_instruction
+from board import Piece, Cell, Player, Board, Orientation, Color, Location, PlaceMove, MoveInstruction
 from game_logic import placeable, are_adjacent
 import copy
 
@@ -133,7 +133,7 @@ def circle_condtion(player, board, location):
 
 #takes in a move_instruction, this instruction can either be a place instruction or a move instruction
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
-def make_move_ai(board: Board, valid_moves: move_instruction):
+def make_move_ai(board: Board, valid_moves: MoveInstruction):
     if isinstance(valid_moves, list): # It is a move instruction
         inst = []
 
@@ -173,7 +173,7 @@ def get_all_possible_moves(board : Board, player_color: Color):
     # this new_boards variable holds all the new boards that can be "made" by all the performing all possible moves
     # the idea is that we iterate over this when checking the score for each move, and then picking the board we want depending on the AI difficulty
     # not the most efficient approach with regards to performance, but i think it will do /edvin & viktor
-    valid_moves:move_instruction = []
+    valid_moves:MoveInstruction = []
     for row in range(board.num_x):
         for col in range(board.num_y):
             cell = board.get_cell(Location(row, col)) # Get the cell at the current location
@@ -183,11 +183,11 @@ def get_all_possible_moves(board : Board, player_color: Color):
             if cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL: 
 
                 new_horizontal_move = Piece(Location(row, col), Orientation.HORIZONTAL, player_color)
-                new_horizontal_instruction = move_instruction(new_horizontal_move)
+                new_horizontal_instruction = MoveInstruction(new_horizontal_move)
                 valid_moves.append(new_horizontal_instruction)
                 
                 new_vertical_move = Piece(Location(row, col), Orientation.VERTICAL, player_color)
-                new_vertical_instruction = move_instruction(new_vertical_move)
+                new_vertical_instruction = MoveInstruction(new_vertical_move)
                 valid_moves.append(new_vertical_instruction)
 
             # Add all possible boards that can be created after moving a stack.
@@ -274,8 +274,8 @@ def undo_move(board: Board):
     else: #otherwise it is a place instruction
         piece:Piece = instruction.instructions
         board.get_cell(piece.location).remove_top_piece()
-        Color = piece.color
-        if Color == Color.WHITE:
+        color = piece.color
+        if color == Color.WHITE:
             board.white_pieces_placed -= 1
         else:    
             board.black_pieces_placed -= 1

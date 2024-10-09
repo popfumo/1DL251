@@ -53,7 +53,7 @@ class Location:
     def __hash__(self):
         return hash((self.x, self.y))
 
-class place_move:
+class PlaceMove:
     def __init__(self, piece_color:Color, location:Location, orientation:Orientation):
         self.piece_color = piece_color
         self.location = location
@@ -74,7 +74,7 @@ class Piece:
                     self.color == other.color)
     
 
-class move_instruction:
+class MoveInstruction:
         def __init__(self, instructions:Piece):
             self.instructions = instructions
     

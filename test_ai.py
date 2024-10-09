@@ -1,6 +1,6 @@
 import unittest
 from game_ai import best_move, longest_road, center_control, edge_control, flat_stone_diff, score
-from board import Board, Player, Color, Location, Orientation, Piece,move_instruction
+from board import Board, Player, Color, Location, Orientation, Piece,MoveInstruction
 from interaction_functions import place_piece, make_move_ai,get_all_possible_moves, undo_move
 
 class TestGameAi(unittest.TestCase):
@@ -74,7 +74,7 @@ class TestGameAi(unittest.TestCase):
         piece = Piece(Location(1, 1),Orientation.HORIZONTAL, player2.color)
 
         
-        new_instruction = move_instruction(piece)
+        new_instruction = MoveInstruction(piece)
         
         place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
         assert (board.black_pieces_placed == 1)
@@ -88,17 +88,17 @@ class TestGameAi(unittest.TestCase):
         player2 = Player(Color.WHITE)
 
         start_location = Piece(Location(1, 0),Orientation.HORIZONTAL, player1.color)
-        Piece1 = Piece(Location(1, 1),Orientation.HORIZONTAL, player2.color)
-        Piece2 = Piece(Location(1, 2),Orientation.HORIZONTAL, player2.color)
+        piece1 = Piece(Location(1, 1),Orientation.HORIZONTAL, player2.color)
+        piece2 = Piece(Location(1, 2),Orientation.HORIZONTAL, player2.color)
 
-        valid_moves = [start_location, Piece1, Piece2]
+        valid_moves = [start_location, piece1, piece2]
         make_move_ai(board, valid_moves)
         assert(board.get_cell(Location(1, 0)).is_empty())
         print(board.get_cell(Location(1, 1)).get_top_piece())
-        print(Piece1)
-        assert(board.get_cell(Location(1, 1)).get_top_piece() == Piece1)
-        assert(board.get_cell(Location(1, 2)).get_top_piece() == Piece2)
-        assert(board.latest_move_white == [Piece1, Piece2])
+        print(piece1)
+        assert(board.get_cell(Location(1, 1)).get_top_piece() == piece1)
+        assert(board.get_cell(Location(1, 2)).get_top_piece() == piece2)
+        assert(board.latest_move_white == [piece1, piece2])
 
     def test_place_after_finding_moves(self):
         board = Board()
