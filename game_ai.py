@@ -14,7 +14,7 @@ def find_best_move_thread(board, valid_moves):
     next_move = None
     find_best_move(board, valid_moves)
 
-def setDifficulty():
+def set_difficulty():
     """
     Prompts the user to choose the AI difficulty level.
     Returns the selected difficulty as a string: 'easy', 'medium', or 'hard'.
@@ -27,11 +27,11 @@ def setDifficulty():
             print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
-def bestMove(board,validMoves, difficulty):
+def best_move(valid_moves, difficulty):
     
     if difficulty == "easy":
         # Randomly select a move from the valid moves
-        return random.choice(validMoves)
+        return random.choice(valid_moves)
     
     elif difficulty == "medium":
         thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
@@ -54,7 +54,7 @@ def bestMove(board,validMoves, difficulty):
 #   BLACK wants to minimize                     #
 #################################################
 
-def longestRoad(board):
+def longest_road(board):
     """
     Finds and returns the length of the longest road (horizontal or vertical connection).
 
@@ -82,10 +82,10 @@ def longestRoad(board):
     return longest_road_score
 
 #Number of adjecent squares where the player can extend their road
-def potentialRoadExtensions(board, player):
+def potential_road_extensions(board, player):
     return 0
-
-def flatStoneDiff(board:Board):
+                    
+def flat_stone_diff(board):
     """
     Calculates the flat stone differential between the player and the opponent.
     FSD criteria. Does not take into consideration stacks.
@@ -99,7 +99,7 @@ def flatStoneDiff(board:Board):
 
     return board.white_pieces_placed - board.black_pieces_placed
 
-def centerControl(board):
+def center_control(board):
     """
     Calculates how many center squares the player controls. Center control criteria.
 
@@ -121,7 +121,7 @@ def centerControl(board):
 
     return center_score
 
-def edgeControl(board):
+def edge_control(board):
     """
     Calculates how many edge squares the player controls. Edge control criteria.
 
@@ -167,17 +167,17 @@ def score(board):
         return -WIN
     
     # Calculate each criterion for the player and opponent
-    player_longest_road = longestRoad(board)
+    player_longest_road = longest_road(board)
     #print(f'longest road:{player_longest_road}')
     
     # TODO: Calculate extention potential
     # TODO: blocking opponent
     
-    player_flat_stones = flatStoneDiff(board)
+    player_flat_stones = flat_stone_diff(board)
     #print(f'flatstone diff:{player_flat_stones}')
-    center_control = centerControl(board)
+    the_center_control = center_control(board)
     #print(f'center control:{center_control}')
-    edge_control = edgeControl(board)
+    the_edge_control = edge_control(board)
     #print(f'edge_control:{edge_control}')
 
     # Weights for each criterion (adjust these values as needed)
@@ -189,8 +189,8 @@ def score(board):
     # Calculate the score for the player
     board_score = (player_longest_road * weight_longest_road) + \
                    (player_flat_stones * weight_flat_stones) + \
-                   (center_control * weight_center_control) + \
-                   (edge_control * weight_edge_control)
+                   (the_center_control * weight_center_control) + \
+                   (the_edge_control * weight_edge_control)
 
     return board_score
 

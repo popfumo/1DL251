@@ -5,7 +5,7 @@ from game_logic import placeable, are_adjacent
 import copy
 
 
-num_pieces = 21
+NUM_PIECES = 21
 
 # Places a piece in a cell, returns True if the piece was placed, False otherwise
 # piece is placed at the front of the array
@@ -151,7 +151,7 @@ def circle_condtion(player, board, location):
     return 0
 
 
-def getAllPossibleMoves(board : Board, player_color: Color):
+def get_all_possible_moves(board : Board, player_color: Color):
     """
     This function will create a list of boards, it will take the current board and make a copy of it, 
     it will then create a new board for each possible move that can be made and append to a list.
@@ -195,7 +195,7 @@ def getAllPossibleMoves(board : Board, player_color: Color):
 
 # Returns a list of all possible boards that can be created after moving a stack of pieces
 # num_pieces_to_move is the number of pieces to move from the stack
-# This function is called by getAllPossibleMoves()
+# This function is called by get_all_possible_moves()
 def get_all_possible_boards_after_stack_move(board:Board, player_color,start_location: Location, num_pieces_to_move: int):
     assert num_pieces_to_move > 0
     start_cell: Cell = board.get_cell(start_location)
@@ -214,12 +214,12 @@ def get_all_possible_boards_after_stack_move(board:Board, player_color,start_loc
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
     new_boards = []
-    aux_get_all_PBASM(board, start_location, colors_of_pieces_to_move, new_boards)
+    aux_get_all_pbasm(board, start_location, colors_of_pieces_to_move, new_boards)
     return new_boards
 
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
-def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
+def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: list, new_boards: list):
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:  # Check adjacent cells
         new_x, new_y = loc.x + dx, loc.y + dy
         #print(len(colors_of_pieces_to_move))
@@ -234,6 +234,6 @@ def aux_get_all_PBASM(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 #print(f'Piece placed at {new_loc.x}, {new_loc.y} with color {new_piece.color}')
                 # Do we have more pieces to move? if so do the recursive call
                 if len(copy_colors_of_pieces_to_move) > 0:
-                    aux_get_all_PBASM(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
+                    aux_get_all_pbasm(new_board, new_loc, copy_colors_of_pieces_to_move, new_boards)
                 else: 
                     new_boards.append(new_board)
