@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from board import Piece, Cell, Player, Board, Orientation, Location, Color
-from interaction_functions import getAllPossibleMoves
+from interaction_functions import get_all_possible_moves
 
 # Checks if a piece can be placed in a cell, returns True if there is no standing piece, False otherwise
 def placeable(board, location):
@@ -97,7 +97,7 @@ def game_over(board, player1, player2):
         return True
 
     # Check if both players have no valid moves left (stalemate)
-    if not getAllPossibleMoves(board, player1) and not getAllPossibleMoves(board, player2):
+    if not get_all_possible_moves(board, player1) and not get_all_possible_moves(board, player2):
         return True  # No moves left for either player
     
     return False  # Game is not over
