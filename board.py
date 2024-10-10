@@ -74,6 +74,10 @@ class Piece:
                     self.color == other.color)
     
 
+class MoveType(Enum):
+    STACKMOVE = 1
+    PLACEMENTMOVE = 2
+
 class MoveInstruction:
         def __init__(self, instructions:Piece):
             self.instructions = instructions

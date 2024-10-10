@@ -1,5 +1,5 @@
 import unittest
-from game_ai import best_move, longest_road, center_control, edge_control, flat_stone_diff, score
+from game_ai import AI_get_move, longest_road, center_control, edge_control, flat_stone_diff, score
 from board import Board, Player, Color, Location, Orientation, Piece,MoveInstruction
 from interaction_functions import place_piece, make_move_ai,get_all_possible_moves, undo_move
 
@@ -14,7 +14,7 @@ class TestGameAi(unittest.TestCase):
     def test_best_move_easy(self):
         # Test best_move for easy difficulty (random move)
         valid_moves = [('place', 1, 1, Orientation.HORIZONTAL), ('place', 2, 2, Orientation.VERTICAL)]
-        move = best_move(valid_moves, 'easy')
+        move = AI_get_move(valid_moves, 'easy')
         self.assertIn(move, valid_moves)
 
     def test_longest_road(self):
@@ -112,30 +112,30 @@ class TestGameAi(unittest.TestCase):
         assert (board.white_pieces_placed == 1)
         assert (board.latest_move_white == move)
 
-    # def test_ai_undo_move(self):
-    #     board = Board()
-    #     player1 = Player(Color.BLACK)
-    #     player2 = Player(Color.WHITE)
+    def test_ai_undo_move(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
 
-    #     place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
-    #     possible_moves = get_all_possible_moves(board, player2.color)
-    #     move = possible_moves[0]
-    #     make_move_ai(board, move)
-    #     assert (board.white_pieces_placed == 1)
-    #     assert (board.latest_move == move)
-    #     undo_move(board)
-    #     assert (board.white_pieces_placed == 0)
-    #     assert (board.get_cell(Location(0, 0)).is_empty())
-    #     assert (board.latest_move == None)
-    #     place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
-    #     move2 = get_all_possible_moves(board, player2.color)
-    #     some_move = move2[24]
-    #     make_move_ai(board, some_move)
-    #     assert (board.white_pieces_placed == 1)
-    #     assert (board.latest_move == some_move)
-    #     undo_move(board)
-    #     assert (board.white_pieces_placed == 0)
-    #     assert (board.latest_move == None)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        possible_moves = get_all_possible_moves(board, player2.color)
+        move = possible_moves[0]
+        make_move_ai(board, move)
+        assert (board.white_pieces_placed == 1)
+        assert (board.latest_move == move)
+        undo_move(board)
+        assert (board.white_pieces_placed == 0)
+        assert (board.get_cell(Location(0, 0)).is_empty())
+        assert (board.latest_move == None)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        move2 = get_all_possible_moves(board, player2.color)
+        some_move = move2[24]
+        make_move_ai(board, some_move)
+        assert (board.white_pieces_placed == 1)
+        assert (board.latest_move == some_move)
+        undo_move(board)
+        assert (board.white_pieces_placed == 0)
+        assert (board.latest_move == None)
         
     def test_simulate_game(self):
         board = Board()
@@ -148,11 +148,16 @@ class TestGameAi(unittest.TestCase):
         print(board)
         print(f'board from test, turn: {board.turn}, should be white')
         possible_moves = get_all_possible_moves(board, player2.color)
-        move = best_move(board, possible_moves, 'medium')
+        move = AI_get_move(board, possible_moves, 'medium')
         make_move_ai(board, move)
-    
+        print('board from test:')
+        print(board)
+        print(f'board from test, turn: {board.turn}, should be white')
+
+        print(f'white pieces placed: {board.white_pieces_placed}')
+
         assert (board.white_pieces_placed == 1)
-        assert (board.latest_move == move)
+        assert (board.latest_move.pop() == move)
         
 if __name__ == '__main__':
     unittest.main()

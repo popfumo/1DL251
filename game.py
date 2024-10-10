@@ -1,7 +1,7 @@
 from board import Board, Player, Color, Location, Orientation
 from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, get_all_possible_moves, make_move_ai
 from game_logic import check_win
-from game_ai import set_difficulty, best_move
+from game_ai import set_difficulty, AI_get_move
 
 '''
 Init:
@@ -18,8 +18,7 @@ def game():
     # Initialize the game
     board = Board()
     player1 = Player(Color.BLACK)
-    player2 = Player(Color.WHITE)
-    current_player = player1  # Black goes first
+    player2 = Player(Color.WHITE)    
     
     difficulty = set_difficulty()
 
@@ -29,15 +28,15 @@ def game():
         print(board)
         print(board.turn)
         # Get player's move
-        move = get_player_move(current_player, board)
+        move = get_player_move(player1, board)
 
         # Execute the move
         if move['type'] == 'place':
-            success = place_piece(current_player, board, move['location'], move['orientation'])
+            success = place_piece(player1, board, move['location'], move['orientation'])
         elif move['type'] == 'move':
-            success = move_piece(current_player, board, move['old_location'], move['new_location'])
+            success = move_piece(player1, board, move['old_location'], move['new_location'])
         elif move['type'] == 'unload':
-            success = unload_piece_recursive(current_player, board, move['num_remove'], move['old_location'], move['old_location'])
+            success = unload_piece_recursive(player1, board, move['num_remove'], move['old_location'], move['old_location'])
 
         # Check if the move was successful
         if not success:
@@ -45,8 +44,8 @@ def game():
             continue
 
         # Check for a win
-        if check_win(board, current_player.color):
-            print(f"{current_player.color.name} wins!")
+        if check_win(board, player1.color):
+            print(f"{player1.color.name} wins!")
             break
         print(board.turn)
         # Check for a stalemate (you'll need to implement this function) TODO
@@ -54,19 +53,19 @@ def game():
         #    print("The game is a draw.")
         #    break
 
-        # Switch to the other player
-        current_player = player2 if current_player == player1 else player1
-
-        possible_moves = get_all_possible_moves(board, current_player.color)
-        the_best_move = best_move(board, possible_moves, difficulty)
-        #print(f'Best move: {best_move}')
+        # Switch to the other player ( the AI )
+        possible_moves = get_all_possible_moves(board, player2.color)
+        the_best_move = AI_get_move(board, possible_moves, difficulty)
+        print(f'Best move: {the_best_move}')
         make_move_ai(board, the_best_move)
 
-        # if check_win(board, current_player.color):
-        #   print(f"{current_player.color.name} wins!")
-        #   break
-
-        current_player = player2 if current_player == player1 else player1
+        if check_win(board, player2.color):
+           print(f"{player2.color.name} wins!")
+           break        
+        
+        print("(black) player1.pieces_placed: " + player1.pieces_placed.__str__())
+        print("(white) player2.pieces_placed: " + player2.pieces_placed.__str__())
+        print("end of Game Loop")
 
 
 

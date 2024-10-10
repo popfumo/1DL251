@@ -25,6 +25,7 @@ def place_piece(player_color:Color, board, location, orientation):
         else:
             board.black_pieces_placed += 1
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
+        board.latest_move.append(new_piece)
         board.turn = board.turn.opposite()
         return True
     else:
@@ -239,7 +240,7 @@ def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: lis
     
     if not colors_of_pieces_to_move:
         instruction = [top_piece] + aux_inst_list
-        instructions.append(instruction)  
+        instructions.append(instruction)
         return
 
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -272,7 +273,7 @@ def undo_move(board: Board):
 
         return True 
     else: #otherwise it is a place instruction
-        piece:Piece = instruction.instructions
+        piece:Piece = instruction
         board.get_cell(piece.location).remove_top_piece()
         color = piece.color
         if color == Color.WHITE:
@@ -281,4 +282,3 @@ def undo_move(board: Board):
             board.black_pieces_placed -= 1
         
         return True
-    
