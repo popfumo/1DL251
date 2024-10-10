@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from board import Piece, Cell, Player, Board, Orientation, Color, Location, PlaceMove, MoveInstruction
+from board import Piece, Cell, PlacementMove, StackMove, MoveType, Player, Board, Orientation, Color, Location, PlaceMove, MoveInstruction
 from game_logic import placeable, are_adjacent
 import copy
 
@@ -20,7 +20,7 @@ def place_piece(player_color:Color, board, location, orientation):
         #player.pieces.insert(0, new_piece)
         #player.pieces_placed += 1
         board.get_cell(location).pieces.insert(0, new_piece)
-        if board.turn == Color.WHITE:
+        if player_color == Color.WHITE:
             board.white_pieces_placed += 1
         else:
             board.black_pieces_placed += 1
@@ -135,7 +135,8 @@ def circle_condtion(player, board, location):
 #takes in a move_instruction, this instruction can either be a place instruction or a move instruction
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
 def make_move_ai(board: Board, valid_moves: MoveInstruction):
-    if isinstance(valid_moves, list): # It is a move instruction
+    move_type: MoveType = valid_moves.get_move_type
+    if move_type.is_stackMove(): # It is a stack move instruction
         inst = []
 
         start_piece = valid_moves[0]
@@ -156,7 +157,6 @@ def make_move_ai(board: Board, valid_moves: MoveInstruction):
         return True
     
     else:  # It is a place instruction
-        board.latest_move.append(valid_moves)
         color = valid_moves.instructions.color
         location = valid_moves.instructions.location
         orientation = valid_moves.instructions.orientation
@@ -184,11 +184,11 @@ def get_all_possible_moves(board : Board, player_color: Color):
             if cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL: 
 
                 new_horizontal_move = Piece(Location(row, col), Orientation.HORIZONTAL, player_color)
-                new_horizontal_instruction = MoveInstruction(new_horizontal_move)
+                new_horizontal_instruction = PlacementMove(new_horizontal_move)
                 valid_moves.append(new_horizontal_instruction)
                 
                 new_vertical_move = Piece(Location(row, col), Orientation.VERTICAL, player_color)
-                new_vertical_instruction = MoveInstruction(new_vertical_move)
+                new_vertical_instruction = PlacementMove(new_vertical_move)
                 valid_moves.append(new_vertical_instruction)
 
             # Add all possible boards that can be created after moving a stack.
@@ -204,14 +204,14 @@ def get_all_possible_moves(board : Board, player_color: Color):
 
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
                         #print(f"num_pieces_to_move: {num_pieces_to_move}")
-                        valid_moves.extend(get_all_possible_boards_after_stack_move(board, player_color, start_location, num_pieces_to_move))
+                        valid_moves.extend(get_all_possible__stack_moves(board, player_color, start_location, num_pieces_to_move))
                         #print(f"new_boards length: {len(new_boards)}")
     return valid_moves
 
 # Returns a list of all possible boards that can be created after moving a stack of pieces
 # num_pieces_to_move is the number of pieces to move from the stack
 # This function is called by get_all_possible_moves()
-def get_all_possible_boards_after_stack_move(board:Board, player_color,start_location: Location, num_pieces_to_move: int):
+def get_all_possible__stack_moves(board:Board, player_color,start_location: Location, num_pieces_to_move: int):
     assert num_pieces_to_move > 0
     start_cell: Cell = board.get_cell(start_location)
     assert not start_cell.is_empty()
@@ -228,7 +228,7 @@ def get_all_possible_boards_after_stack_move(board:Board, player_color,start_loc
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
     instructions = []
-    aux_get_all_pbasm(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece())
+    aux_get_all_psm(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece())
     return instructions
 
 aux_inst_list = []
@@ -236,11 +236,11 @@ aux_inst_list = []
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
 #it will return a list with first the stacks start piece and then the instructions to move the pieces
-def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece):
+def aux_get_all_psm(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece):
     
     if not colors_of_pieces_to_move:
-        instruction = [top_piece] + aux_inst_list
-        instructions.append(instruction)
+        move_instruction = StackMove(aux_inst_list, top_piece)
+        instructions.append(move_instruction)
         return
 
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -255,7 +255,7 @@ def aux_get_all_pbasm(board: Board, loc: Location, colors_of_pieces_to_move: lis
                 board.get_cell(new_loc).pieces.insert(0, new_piece)
                 aux_inst_list.append(new_piece)
                 
-                aux_get_all_pbasm(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece)
+                aux_get_all_psm(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece)
                 
                 aux_inst_list.pop()
                 board.get_cell(new_loc).pieces.remove(new_piece)

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import copy
-
-
+from typing import List
 from enum import Enum
 
 #The maximum number of pieces that can be placed
@@ -77,12 +76,27 @@ class Piece:
 class MoveType(Enum):
     STACKMOVE = 1
     PLACEMENTMOVE = 2
+    def is_stackMove(self):
+        return self == MoveType.STACKMOVE
+    def is_placementMove(self):
+        return self == MoveType.PLACEMENTMOVE
 
-class MoveInstruction:
-        def __init__(self, instructions:Piece):
-            self.instructions = instructions
+class MoveInstruction: # used to represent a move, either a placement or a stack move
+        move_type: MoveType
+        def get_move_type(self) -> MoveType:
+            return self.move_type
+
+class StackMove(MoveInstruction):
+    def __init__(self, stack_moves: List[Piece], start_cell):
+        self.stack_moves = stack_moves
+        self.start_cell = start_cell
+        self.move_type = MoveType.STACKMOVE
+
+class PlacementMove(MoveInstruction):
+    def __init__(self, new_placement:Piece):
+        self.new_placement: Piece = new_placement
+        self.move_type = MoveType.PLACEMENTMOVE
     
-
 # Initializes a player with 0 pieces placed so far
 class Player:
     def __init__(self, color):
