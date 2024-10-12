@@ -134,21 +134,17 @@ def circle_condtion(player, board, location):
 
 #takes in a move_instruction, this instruction can either be a place instruction or a move instruction
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
-def make_move_ai(board: Board, valid_moves: MoveInstruction):
-    move_type: MoveType = valid_moves.get_move_type
-    if move_type.is_stackMove(): # It is a stack move instruction
+def make_move_ai(board: Board, move_to_make: MoveInstruction):
+
+
+    if isinstance(move_to_make, StackMove): # It is a stack move instruction
         inst = []
 
-        start_piece = valid_moves[0]
-
-        for instruction in valid_moves[1:]:
-            color = instruction.color
-            location = instruction.location
-            orientation = instruction.orientation
-            new_piece = Piece(location, orientation, color)
-
-            board.get_cell(location).pieces.insert(0, new_piece)
-            inst.append(new_piece)
+        start_piece = move_to_make.start_cell
+    
+        for piece in move_to_make.stack_moves:
+            board.get_cell(piece.location).pieces.insert(0, piece)
+            inst.append(piece)
             board.get_cell(start_piece.location).remove_top_piece() 
         
         board.latest_move.append(inst)
@@ -157,9 +153,10 @@ def make_move_ai(board: Board, valid_moves: MoveInstruction):
         return True
     
     else:  # It is a place instruction
-        color = valid_moves.instructions.color
-        location = valid_moves.instructions.location
-        orientation = valid_moves.instructions.orientation
+        #print (type(move_to_make))
+        location = move_to_make.new_placement.location
+        color = move_to_make.new_placement.color
+        orientation = move_to_make.new_placement.orientation
         place_piece(color, board, location, orientation)
         
         # Tror den tar bara en instruktion

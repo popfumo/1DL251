@@ -76,10 +76,6 @@ class Piece:
 class MoveType(Enum):
     STACKMOVE = 1
     PLACEMENTMOVE = 2
-    def is_stackMove(self):
-        return self == MoveType.STACKMOVE
-    def is_placementMove(self):
-        return self == MoveType.PLACEMENTMOVE
 
 class MoveInstruction: # used to represent a move, either a placement or a stack move
         move_type: MoveType
