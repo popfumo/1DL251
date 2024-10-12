@@ -1,7 +1,8 @@
 import unittest
 from game_ai import AI_get_move, longest_road, center_control, edge_control, flat_stone_diff, score
-from board import Board, Player, Color, Location, Orientation, Piece,MoveInstruction, StackMove, PlacementMove
+from board import Board, Player, Color, Location, Orientation, Piece,MoveInstruction, StackMove, PlacementMove, GameResult
 from interaction_functions import place_piece, make_move_ai,get_all_possible_moves, undo_move
+from game_logic import check_win
 
 class TestGameAi(unittest.TestCase):
 
@@ -160,6 +161,76 @@ class TestGameAi(unittest.TestCase):
 
         assert (board.white_pieces_placed == 1)
         assert (board.latest_move.pop() == move.new_placement)
+    
+    def test_check_win_path_left_to_right(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(4, 0), Orientation.HORIZONTAL)
+        
+        assert (check_win(board) == GameResult.VICTORY_BLACK)
+
+    def test_check_win_path_top_to_bottom(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        place_piece(player1.color, board, Location(0,0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,4), Orientation.HORIZONTAL)
+        
+        assert (check_win(board) == GameResult.VICTORY_BLACK)
+        
+    def test_check_snake_win_path_top_to_bottom(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        # This is the snake path that is tested in this test
+        #  |X| | | | |
+        #  |X|X|X|X| |
+        #  | | | |X| |
+        #  | |X|X|X| |
+        #  | |X| | | |
+        
+        place_piece(player1.color, board, Location(0,0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3,2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,4), Orientation.HORIZONTAL)
+        assert (check_win(board) == GameResult.VICTORY_BLACK)
+
+    def test_check_snake_win_path_left_to_right(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        # This is the snake path that is tested in this test
+        #  |X|X| | | |
+        #  | |x|x|x|x|
+        #  | | | | | |
+        #  | | | | | |
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(4, 1), Orientation.HORIZONTAL)
+
+        assert (check_win(board) == GameResult.VICTORY_BLACK)
         
 if __name__ == '__main__':
     unittest.main()

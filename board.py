@@ -2,6 +2,7 @@
 import copy
 from typing import List
 from enum import Enum
+from dataclasses import dataclass
 
 #The maximum number of pieces that can be placed
 NUM_PIECES = 21
@@ -9,6 +10,18 @@ NUM_PIECES = 21
 class Color(Enum):
     BLACK = 1
     WHITE = 2
+    def from_id(id):
+        # print("from_id: " + id.__str__())
+        if id == 1:
+            return Color.BLACK
+        elif id == 2:
+            return Color.WHITE
+        else:
+            raise ValueError("Invalid color id")
+    def __str__(self):
+        return self.name
+    def __repr__(self):
+        return self.name
     def opposite(self):
         return Color.BLACK if self == Color.WHITE else Color.WHITE
 
@@ -16,9 +29,17 @@ class Orientation(Enum):
     HORIZONTAL = 1
     VERTICAL = 2
 
+class GameResult(Enum):
+    VICTORY_BLACK = Color.BLACK.value
+    VICTORY_WHITE = Color.WHITE.value
+    NOT_FINISHED = 0
+    DRAW = -1
+    def victory_from_color(color:Color):    
+        return GameResult.VICTORY_BLACK if color == Color.BLACK else GameResult.VICTORY_WHITE
 
-# Initializes a cell with a empty list of pieces
+
 class Cell:
+# Initializes a cell with a empty list of pieces
     def __init__(self, x, y):
         self.pieces = []
         self.location = Location(x, y)

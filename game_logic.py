@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from board import Piece, Cell, Player, Board, Orientation, Location, Color
+from board import Piece, Cell, Player, Board, Orientation, Location, Color, GameResult
+from typing import List
 
 # Checks if a piece can be placed in a cell, returns True if there is no standing piece, False otherwise
 def placeable(board, location):
@@ -42,38 +43,83 @@ def find_connected_pieces(board, player_color:Color,start_location):
     
     return connected
 
-def check_win(board, player_color:Color):
+
+# these are the targets when checking for a win from left to right and top to bottom
+targets_right: List[Location] = [Location(4, 0), Location(4, 1), Location(4, 2), Location(4, 3), Location(4, 4)]
+targets_bottom: List[Location] = [Location(0, 4), Location(1, 4), Location(2, 4), Location(3, 4), Location(4, 4)]
+
+def check_win(board: Board) -> GameResult: 
     """
-    Check if the given player has won the game by finding a path of their pieces
+    Check if the either player has won the game by finding a path of their pieces
     from one side of the board to the opposite side.
+
+    We check for both players since if player A moves a stack it might lead to player B having a winning path,
+    thus it is not sufficient to check if player A has won after player A has made a move.
+
+    Also a stack move can also lead to both players having a winning path, in that case the game is a draw. 
+    This function needs to handle this as well.
     
     Args:
     board (Board): The game board
-    player (Player): The player to check for a win
     
     Returns:
     bool: True if the player has won, False otherwise
     """
+    
+    winners = []
+    for color in [Color.BLACK, Color.WHITE]:
+        winpath_found = False
+        # Check if the player has a winning path from left to right
+        if not winpath_found:
+            for x in range(board.num_x):
+                # find a winning path for the player
 
-    # Check for a path from left to right
-    for y in range(5):
-        start_cell = board.get_cell(Location(0, y))
-        start_piece = start_cell.get_top_piece()
-        if start_piece and start_piece.color == player_color and start_piece.orientation == Orientation.HORIZONTAL:
-            connected = find_connected_pieces(board, player_color, Location(0, y))
-            if any(loc.x == 4 for loc in connected):
-                return True
+                start_loc = Location(x, 0)
+                if board.get_cell(start_loc).get_top_piece() != None and board.get_cell(start_loc).get_top_piece().color == color: # only check for winpaths if the top piece is the right color
+                    winpath_found = check_win_aux(board, [], start_loc, targets_right)
 
-    # Check for a path from top to bottom
-    for x in range(5):
-        start_cell = board.get_cell(Location(x, 0))
-        start_piece = start_cell.get_top_piece()
-        if start_piece and start_piece.color == player_color and start_piece.orientation == Orientation.HORIZONTAL:
-            connected = find_connected_pieces(board, player_color, Location(x, 0))
-            if any(loc.y == 4 for loc in connected):
-                return True
+                # if a winpath is found,
+                if winpath_found:
+                    winners.append(GameResult.victory_from_color(color))
+                    break
 
+        
+        # Check if the player has a winning path from top to bottom
+        if not winpath_found:
+            for y in range(board.num_y):
+                
+                start_loc = Location(0, y)
+
+                if board.get_cell(start_loc).get_top_piece() != None and board.get_cell(start_loc).get_top_piece().color == color: # only check for winpaths if the top piece is the right color
+                    winpath_found = check_win_aux(board, [], start_loc, targets_bottom)
+
+                # if a winpath is found,
+                if winpath_found:
+                    winners.append(GameResult.victory_from_color(color))
+                    break
+
+    if len(winners) == 2:
+        return GameResult.DRAW
+    elif len(winners) == 1:
+        return winners[0]
+    else:
+        return GameResult.NOT_FINISHED
+    
+def check_win_aux(board:Board, visited: List[Cell], loc:Location, targets: List[Cell]) -> bool:
+    if loc in targets:
+        return True
+    visited.append(loc)
+
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        new_x, new_y = loc.x + dx, loc.y + dy
+        if 0 <= new_x < 5 and 0 <= new_y < 5:  
+            new_loc = Location(new_x, new_y)
+            if new_loc not in visited:
+                cell = board.get_cell(new_loc)
+                if not cell.is_empty():
+                    top_piece = cell.get_top_piece()
+                    if top_piece.color == board.get_cell(loc).get_top_piece().color and top_piece.orientation == Orientation.HORIZONTAL:
+                        return check_win_aux(board, visited, new_loc, targets)
+                    
     return False
-
-# Returns a list containing the possible boards that can be created after each possible move has been made
 

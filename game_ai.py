@@ -1,6 +1,6 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation, check_win
-from board import Player, Color, Board
+from board import Player, Color, Board, GameResult
 from interaction_functions import get_all_possible_moves, make_move_ai, undo_move
 import threading
 
@@ -28,11 +28,16 @@ def set_difficulty():
     Returns the selected difficulty as a string: 'easy', 'medium', or 'hard'.
     """
     while True:
-        difficulty = input("Choose difficulty (easy, medium, hard): ").lower()
-        if difficulty in ['easy', 'medium', 'hard']:
-            return difficulty
-        else:
-            print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
+        difficulty = input("Choose difficulty (easy (1), medium (2), hard (3)): ").lower()
+        match difficulty:
+            case "1":
+                return "easy"
+            case "2":
+                return "medium"
+            case "3":
+                return "hard"
+            case _:
+                print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
 def AI_get_move(board,valid_moves, difficulty):
@@ -171,10 +176,12 @@ def score(board):
 
     board_score = 0
 
-    if check_win(board, Color.WHITE):#White wins
-        return WIN 
-    elif check_win(board, Color.BLACK):#Black wins
+    game_result = check_win(board)
+    if game_result == GameResult.VICTORY_BLACK:
         return -WIN
+    elif game_result == GameResult.VICTORY_WHITE:
+        return WIN
+ 
     
     # Calculate each criterion for the player and opponent
     player_longest_road = longest_road(board)

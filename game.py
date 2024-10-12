@@ -1,4 +1,4 @@
-from board import Board, Player, Color, Location, Orientation
+from board import Board, Player, Color, Location, Orientation, GameResult
 from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, get_all_possible_moves, make_move_ai
 from game_logic import check_win
 from game_ai import set_difficulty, AI_get_move
@@ -26,8 +26,9 @@ def game():
     while True:
         # Display the current board state
         print(board)
-        print(board.turn)
+        # print(board.turn)
         # Get player's move
+
         move = get_player_move(player1, board)
 
         # Execute the move
@@ -43,11 +44,13 @@ def game():
             print("Invalid move. Try again.")
             continue
 
-        # Check for a win
-        if check_win(board, player1.color):
-            print(f"{player1.color.name} wins!")
+        game_result = check_game_end(board)
+        if game_result != GameResult.NOT_FINISHED:
             break
-        print(board.turn)
+        
+
+        # print("### board.turn ###")
+        # print(board.turn)
         # Check for a stalemate (you'll need to implement this function) TODO
         #if is_stalemate(board):
         #    print("The game is a draw.")
@@ -56,22 +59,34 @@ def game():
         # Switch to the other player ( the AI )
         possible_moves = get_all_possible_moves(board, player2.color)
         the_best_move = AI_get_move(board, possible_moves, difficulty)
-        print(f'Best move: {the_best_move}')
+        # print(f'Best move: {the_best_move}')
         make_move_ai(board, the_best_move)
 
-        if check_win(board, player2.color):
-           print(f"{player2.color.name} wins!")
-           break        
+        game_result = check_game_end(board)
+        if game_result != GameResult.NOT_FINISHED:
+            break
         
         print("(black) player1.pieces_placed: " + player1.pieces_placed.__str__())
         print("(white) player2.pieces_placed: " + player2.pieces_placed.__str__())
         print("end of Game Loop")
 
-
+def check_game_end(board):
+    game_result = check_win(board)
+    if game_result == GameResult.VICTORY_BLACK or game_result == GameResult.VICTORY_WHITE:
+        winner = Color.from_id(game_result.value)
+        print(f"{winner} wins!")
+    elif game_result == GameResult.DRAW:
+        print("The game is a draw.")
+    elif game_result == GameResult.NOT_FINISHED:
+        pass
+    else: 
+        print("Error: Invalid game result.")
+    
+    return game_result
 
 def get_player_move(player, board):
     # Prompt player for the type of move they want to make
-    print(f"{player.color.name} Player, it's your turn.")
+    # print(f"{player.color.name} Player, it's your turn.")
     print("Choose your action: ")
     print("1. Place a piece")
     print("2. Move a piece")
