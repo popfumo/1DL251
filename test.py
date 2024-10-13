@@ -3,7 +3,7 @@ from unittest.mock import patch
 from io import StringIO
 from board import Board, Player, Color, Location, Orientation, Piece
 from game import game
-from interaction_functions import place_piece, unload_piece_recursive, get_all_possible_moves
+from interaction_functions import place_piece, unload_piece_recursive, get_all_possible_moves, check_unload
 from game_ai import longest_road
 
 class TestGame(unittest.TestCase):
@@ -191,6 +191,22 @@ class TestGame(unittest.TestCase):
         assert (board.white_pieces_placed == 1)
         place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
         assert (board.black_pieces_placed == 2)
+
+    def test_invalid_unload(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        assert(check_unload(board, player1) == True)
+        place_piece(player2.color, board, Location(0,0), Orientation.HORIZONTAL)
+        assert(check_unload(board, player1) == False)
+        assert(check_unload(board, player2) == True)
+        place_piece(player1.color, board, Location(0, 0), Orientation.VERTICAL)
+        assert(check_unload(board, player1) == False)
+        assert(check_unload(board, player2) == False)
+        place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        assert(check_unload(board, player1) == True)
+
 
 
 

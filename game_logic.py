@@ -76,7 +76,7 @@ def check_win(board: Board) -> GameResult:
 
                 start_loc = Location(x, 0)
                 if board.get_cell(start_loc).get_top_piece() != None and board.get_cell(start_loc).get_top_piece().color == color: # only check for winpaths if the top piece is the right color
-                    winpath_found = check_win_aux(board, [], start_loc, targets_right)
+                    winpath_found = check_win_aux(board, [], start_loc, targets_bottom)
 
                 # if a winpath is found,
                 if winpath_found:
@@ -91,7 +91,9 @@ def check_win(board: Board) -> GameResult:
                 start_loc = Location(0, y)
 
                 if board.get_cell(start_loc).get_top_piece() != None and board.get_cell(start_loc).get_top_piece().color == color: # only check for winpaths if the top piece is the right color
-                    winpath_found = check_win_aux(board, [], start_loc, targets_bottom)
+                    # This doesn't work, it returns true if a location is part of the target which is a set of locations
+                    # So even if the ai or the player has placed only one piece its in the target location, it will return true
+                    winpath_found = check_win_aux(board, [], start_loc, targets_right)
 
                 # if a winpath is found,
                 if winpath_found:

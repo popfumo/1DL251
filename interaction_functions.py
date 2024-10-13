@@ -279,3 +279,13 @@ def undo_move(board: Board):
             board.black_pieces_placed -= 1
         
         return True
+#This function check if the player can actually unload a cell in the current board state. This function is called every time the player wants to unload a cell
+# on the board.     
+def check_unload(board: Board, player:Player):
+    for row in range(board.num_x):
+        for col in range(board.num_y):
+            cell = board.get_cell(Location(row, col))
+            curr_piece = cell.get_top_piece()
+            if not cell.is_empty() and curr_piece.color == player.color and curr_piece.orientation != Orientation.VERTICAL:
+                return True
+    return False
