@@ -53,6 +53,9 @@ class Cell:
     def remove_top_piece(self):
         if len(self.pieces) > 0:
             return self.pieces.pop(0)
+    def remove_bottom_piece(self):
+        if len(self.pieces) > 0:
+            return self.pieces.pop()
     
 class Location:
     # x and y both start at 0 and end at 4
@@ -62,7 +65,7 @@ class Location:
         self.x = x
         self.y = y
     def __repr__(self):
-        return f"{self.x}, {self.y}"
+        return f"Location({self.x},{self.y})"
 
     def __eq__(self, other):
         return isinstance(other, Location) and self.x == other.x and self.y == other.y
@@ -73,11 +76,14 @@ class Location:
     def __hash__(self):
         return hash((self.x, self.y))
 
-class PlaceMove:
-    def __init__(self, piece_color:Color, location:Location, orientation:Orientation):
-        self.piece_color = piece_color
-        self.location = location
-        self.orientation = orientation
+# class PlaceMove:
+#     def __init__(self, piece_color:Color, location:Location, orientation:Orientation):
+#         self.piece_color = piece_color
+#         self.location = location
+#         self.orientation = orientation
+#     
+#     def __eq__(self, value):
+#         return self.piece_color == value.piece_color and self.location == value.location and self.orientation == value.orientation
 
 class Piece:
     def __init__(self, location: Location, orientation: Orientation, color: Color):
@@ -104,15 +110,25 @@ class MoveInstruction: # used to represent a move, either a placement or a stack
             return self.move_type
 
 class StackMove(MoveInstruction):
-    def __init__(self, stack_moves: List[Piece], start_cell):
-        self.stack_moves = stack_moves
+    def __init__(self, smoves: List[Piece], start_cell):
+        assert len(smoves) > 0
+        self.stack_moves = smoves
         self.start_cell = start_cell
         self.move_type = MoveType.STACKMOVE
+    def __str__(self):
+        return f"StackMove: {self.stack_moves} from {self.start_cell}"
 
 class PlacementMove(MoveInstruction):
     def __init__(self, new_placement:Piece):
         self.new_placement: Piece = new_placement
         self.move_type = MoveType.PLACEMENTMOVE
+    def is_equal(self, loc:Location, orientation:Orientation):
+        return self.new_placement.location.x == loc.x and self.new_placement.location.y == loc.y and self.new_placement.orientation == orientation
+    
+    def __str__(self):
+        return f"PlacementMove: {self.new_placement}"
+    # def __eq__(self, value):
+    #     return self.new_placement.location.x == value.new_placement.location. and self.move_type == value.move_type 
     
 # Initializes a player with 0 pieces placed so far
 class Player:

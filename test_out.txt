@@ -1,0 +1,53 @@
+aux_inst_list: [4, 3 Orientation.HORIZONTAL]
+aux_inst_list: [3, 4 Orientation.HORIZONTAL]
+<board.PlacementMove object at 0x731a636d1a80>
+<board.PlacementMove object at 0x731a636d1ba0>
+<board.PlacementMove object at 0x731a636d1cc0>
+<board.PlacementMove object at 0x731a636d1de0>
+<board.PlacementMove object at 0x731a636d1f00>
+<board.PlacementMove object at 0x731a636d2020>
+<board.PlacementMove object at 0x731a636d2140>
+<board.PlacementMove object at 0x731a636d2260>
+<board.PlacementMove object at 0x731a636d2380>
+<board.PlacementMove object at 0x731a636d24a0>
+<board.PlacementMove object at 0x731a636d25c0>
+<board.PlacementMove object at 0x731a636d26e0>
+<board.PlacementMove object at 0x731a636d2800>
+<board.PlacementMove object at 0x731a636d2920>
+<board.PlacementMove object at 0x731a636d2a40>
+<board.PlacementMove object at 0x731a636d2b60>
+<board.PlacementMove object at 0x731a636d2c80>
+<board.PlacementMove object at 0x731a636d2da0>
+<board.PlacementMove object at 0x731a636d2ec0>
+<board.PlacementMove object at 0x731a636d2fe0>
+<board.PlacementMove object at 0x731a636d3100>
+<board.PlacementMove object at 0x731a636d3220>
+<board.PlacementMove object at 0x731a636d3340>
+<board.PlacementMove object at 0x731a636d3460>
+<board.PlacementMove object at 0x731a636d3580>
+<board.PlacementMove object at 0x731a636d36a0>
+<board.PlacementMove object at 0x731a636d37c0>
+<board.PlacementMove object at 0x731a636d38e0>
+<board.PlacementMove object at 0x731a636d3a00>
+<board.PlacementMove object at 0x731a636d3b20>
+StackMove: [] from 3, 3 Orientation.HORIZONTAL
+StackMove: [] from 3, 3 Orientation.HORIZONTAL
+<board.PlacementMove object at 0x731a636d3df0>
+<board.PlacementMove object at 0x731a636d3cd0>
+<board.PlacementMove object at 0x731a636e0100>
+<board.PlacementMove object at 0x731a636e0220>
+<board.PlacementMove object at 0x731a636e0340>
+<board.PlacementMove object at 0x731a636e0460>
+<board.PlacementMove object at 0x731a636e0580>
+<board.PlacementMove object at 0x731a636e06a0>
+<board.PlacementMove object at 0x731a636e07c0>
+<board.PlacementMove object at 0x731a636e08e0>
+<board.PlacementMove object at 0x731a636e0a00>
+<board.PlacementMove object at 0x731a636e0b20>
+test
+[] [] [] [] [] 
+[] [] [1, 2 Orientation.VERTICAL] [] [] 
+[] [2, 1 Orientation.VERTICAL] [] [2, 3 Orientation.VERTICAL] [] 
+[3, 0 Orientation.HORIZONTAL] [] [3, 2 Orientation.VERTICAL] [3, 3 Orientation.HORIZONTAL] [] 
+[] [] [] [] [] 
+

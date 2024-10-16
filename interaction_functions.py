@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from board import Piece, Cell, PlacementMove, StackMove, MoveType, Player, Board, Orientation, Color, Location, PlaceMove, MoveInstruction
+from board import Piece, Cell, PlacementMove, StackMove, MoveType, Player, Board, Orientation, Color, Location, MoveInstruction
 from game_logic import placeable, are_adjacent
 import copy
 
@@ -47,7 +47,7 @@ def move_piece(player_color, board, old_location, new_location):
         return True
     else:
         return False
-
+# TODO: Dead code, remove 
 # new_locations is an array containing coordinates to place the pieces in, the array is ordered from close to far
 def unload_cell(player, board, old_location, new_locations):
     if len(board.get_cell(old_location).pieces) > 0:
@@ -135,8 +135,6 @@ def circle_condtion(player, board, location):
 #takes in a move_instruction, this instruction can either be a place instruction or a move instruction
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
 def make_move_ai(board: Board, move_to_make: MoveInstruction):
-
-
     if isinstance(move_to_make, StackMove): # It is a stack move instruction
         inst = []
 
@@ -145,14 +143,14 @@ def make_move_ai(board: Board, move_to_make: MoveInstruction):
         for piece in move_to_make.stack_moves:
             board.get_cell(piece.location).pieces.insert(0, piece)
             inst.append(piece)
-            board.get_cell(start_piece.location).remove_top_piece() 
+            board.get_cell(start_piece.location).remove_bottom_piece() 
         
         board.latest_move.append(inst)
         board.turn = board.turn.opposite()
         
         return True
     
-    else:  # It is a place instruction
+    else: # It is a place instruction
         #print (type(move_to_make))
         location = move_to_make.new_placement.location
         color = move_to_make.new_placement.color
@@ -201,6 +199,8 @@ def get_all_possible_moves(board : Board, player_color: Color):
 
                     for num_pieces_to_move in range(1, len(cell.pieces) + 1):
                         #print(f"num_pieces_to_move: {num_pieces_to_move}")
+                        #print(f"num_pieces_to_move: {num_pieces_to_move}")
+                        #print(range(1, len(cell.pieces) + 1))
                         valid_moves.extend(get_all_possible__stack_moves(board, player_color, start_location, num_pieces_to_move))
                         #print(f"new_boards length: {len(new_boards)}")
     return valid_moves
@@ -225,36 +225,45 @@ def get_all_possible__stack_moves(board:Board, player_color,start_location: Loca
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
     
     instructions = []
-    aux_get_all_psm(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece())
+    
+    aux_get_all_psm(board, start_location, colors_of_pieces_to_move, instructions, start_cell.get_top_piece(), recursive_move_list=[])    
+    
+    # instructions = [element for element in instructions if element.stack_moves.__len__() != 0]
+    # for i in instructions:
+    #     print("in get_all_possible_stack_moves" + str(i))
     return instructions
 
-aux_inst_list = []
+# aux_inst_list = []
 
 # This is an auxilary function that is used in get_all_possible_boards_after_stack_move() 
 # This function will call itself recursively until there are no pieces to move
 #it will return a list with first the stacks start piece and then the instructions to move the pieces
-def aux_get_all_psm(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece):
+def aux_get_all_psm(board: Board, loc: Location, colors_of_pieces_to_move: list, instructions: list, top_piece: Piece, recursive_move_list: list):
     
     if not colors_of_pieces_to_move:
-        move_instruction = StackMove(aux_inst_list, top_piece)
+        if len(recursive_move_list)  == 0:
+            return
+        
+        move_instruction = StackMove(recursive_move_list, top_piece)
+        # print("move_instruction in aux_get_all_psm " + str(move_instruction))
         instructions.append(move_instruction)
         return
-
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
         new_x, new_y = loc.x + dx, loc.y + dy
         if 0 <= new_x < 5 and 0 <= new_y < 5:  
             new_loc = Location(new_x, new_y)
             if placeable(board, new_loc):  
-
                 new_piece = Piece(new_loc, Orientation.HORIZONTAL, colors_of_pieces_to_move[0])  
                 #piece_to_save = place_move(new_piece.color, new_loc, new_piece.orientation)
                 
                 board.get_cell(new_loc).pieces.insert(0, new_piece)
-                aux_inst_list.append(new_piece)
+                new_recursive_move_list = copy.deepcopy(recursive_move_list)
+                new_recursive_move_list.append(new_piece)
+                # aux_inst_list.append(new_piece)
                 
-                aux_get_all_psm(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece)
-                
-                aux_inst_list.pop()
+                aux_get_all_psm(board, new_loc, colors_of_pieces_to_move[1:], instructions, top_piece, new_recursive_move_list)
+                                
+                # new_recursive_move_list.pop()
                 board.get_cell(new_loc).pieces.remove(new_piece)
 
 #This function is used to undo the latest move the AI has made.

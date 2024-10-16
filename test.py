@@ -4,7 +4,7 @@ from io import StringIO
 from board import Board, Player, Color, Location, Orientation, Piece
 from game import game
 from interaction_functions import place_piece, unload_piece_recursive, get_all_possible_moves, check_unload
-from game_ai import longest_road
+from game_ai import longest_road, AI_get_move
 
 class TestGame(unittest.TestCase):
     def setUp(self):
@@ -100,6 +100,82 @@ class TestGame(unittest.TestCase):
         longest_road_p1 = longest_road(self.board)
         self.assertEqual(longest_road_p1, -4)
 
+    def test_longest_road_snake(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        # This is the snake path that is tested in this test
+        #  |X|X| | | |
+        #  | |x| | | |
+        #  | |x| | | |
+        #  | |x| | | |
+        #  | |x| | | |
+
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(4, 1), Orientation.HORIZONTAL)
+
+        longest_road_p1 = longest_road(board)
+        self.assertEqual(longest_road_p1, -6)
+
+    def test_snakier_snake(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        # This is the snake path that is tested in this test
+        #  |B|B| | | |
+        #  | |B|B|B| |
+        #  | | | |B| |
+        #  | | | |B| |
+        #  | | | |B| |
+        
+        place_piece(player1.color, board, Location(0,0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(4,3), Orientation.HORIZONTAL)
+
+
+        longest_road_p1 = longest_road(board)
+        self.assertEqual(longest_road_p1, -8)
+
+    def test_snake_with_diversions(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        # This is the snake path that is tested in this test
+        #  |B|B| | | |
+        #  | |B|B|B|W|
+        #  | |W| |B| |
+        #  | | | |B|W|
+        #  | | | |B| |
+                
+        #  |B|B| |P| |
+        #  | |X|X|P|W|
+        #  | |X| |X| |
+        #  | |X|X|X|W|
+        #  | | | |B| |
+        
+        place_piece(player1.color, board, Location(0,0), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(0,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2,1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,2), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1,3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1,4), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(2,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(3,3), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(4,3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3,4), Orientation.HORIZONTAL)
+
+        longest_road_p1 = longest_road(board)
+        self.assertEqual(longest_road_p1, -8)
 
     def test_get_all_possible_moves_middle_1(self):
         # Create a board with some initial pieces
@@ -114,7 +190,6 @@ class TestGame(unittest.TestCase):
         possible_moves = get_all_possible_moves(board, player1.color)
 
         print(possible_moves[-1])
-        print(possible_moves[-1].instructions)
         
         print(f'middle test possible moves: {len(possible_moves)}')
         
@@ -140,7 +215,7 @@ class TestGame(unittest.TestCase):
             for other in pm_copy: # idk might work
                 assert (b != other)                
 
-        print(f'middle test possible moves: {len(possible_moves)}')
+        print(f'middle test possible moves 2: {len(possible_moves)}')
         
         assert (len(possible_moves) == (25 + 25 + 4 + 4*4)) # 25 flat placements, 25 standing placements, 4 (move 1) + 4*4 (move 2) piece-movements available
         # Assert the number of possible moves
@@ -162,6 +237,7 @@ class TestGame(unittest.TestCase):
         
         # Assert the number of possible moves
         # 25 flat placements, 25 standing placements, 4 (move 1) + 4*4 (move 2) + 4*4*4 (move 3) - 4 because we hit the edge of the board 4 times when moving 3, piece-movements available
+        print(f'middle test possible moves 3: {len(possible_moves)}')
         assert (len(possible_moves) == (25 + 25 + 4 + 4*4 + 4*4*4) - 4)
         
        
@@ -207,8 +283,31 @@ class TestGame(unittest.TestCase):
         place_piece(player1.color, board, Location(1, 0), Orientation.HORIZONTAL)
         assert(check_unload(board, player1) == True)
 
+    def test_move(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+        Piece2 = Piece(Location(1,0), Orientation.HORIZONTAL, player2.color)
+        
+        board.get_cell(Piece2.location).pieces.insert(0, Piece2) 
+        board.get_cell(Piece2.location).pieces.insert(0, Piece2) 
+        board.get_cell(Piece2.location).pieces.insert(0, Piece2) 
+        board.get_cell(Piece2.location).pieces.insert(0, Piece2)
+
+        all_moves = get_all_possible_moves(board, player2.color)
+
+        print(board)
+        moves_to_test = all_moves[50:]
+        print(f'moves_to_test: {moves_to_test}')
+        #best_moves = AI_get_move(board, moves_to_test, "medium")
 
 
+        print(board)
+
+
+
+        
 
 
 if __name__ == '__main__':

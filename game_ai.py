@@ -1,8 +1,8 @@
 import random
 from game_logic import find_connected_pieces, Location, Orientation, check_win
-from board import Player, Color, Board, GameResult
+from board import Player, Color, Board, GameResult, MoveType, StackMove, PlacementMove
 from interaction_functions import get_all_possible_moves, make_move_ai, undo_move
-import threading
+import copy
 
 
 #############################################################################################
@@ -40,8 +40,10 @@ def set_difficulty():
                 print("Invalid input. Please choose 'easy', 'medium', or 'hard'.")
 
 # Function for AI to choose its move based on the difficulty
+# Makes a copy of the board, so dont spam this function
 def AI_get_move(board,valid_moves, difficulty):
     
+    board_copy = copy.deepcopy(board)
     if difficulty == "easy":
         # Randomly select a move from the valid moves
         return random.choice(valid_moves)
@@ -53,13 +55,13 @@ def AI_get_move(board,valid_moves, difficulty):
         
         #thread.join()
 
-        find_best_move(board, valid_moves)
+        find_best_move(board_copy, valid_moves)
         
         return next_move
     
     elif difficulty == "hard":
 
-        find_best_move(board, valid_moves)
+        find_best_move(board_copy, valid_moves)
 
         return next_move
 
@@ -102,8 +104,7 @@ def potential_road_extensions(board, player):
 
 def flat_stone_diff(board:Board):
     """
-    Calculates the flat stone differential between the player and the opponent.
-    FSD criteria. Does not take into consideration stacks.
+    Counts the top pieces on the board and returns the difference between the white and black pieces.
 
     Args:
     board: the board to count the flatstones on
@@ -111,9 +112,21 @@ def flat_stone_diff(board:Board):
     Returns:
     The flat stone differential (int).
     """
+    piece_score = 0
+    for row in range(board.num_x):
+        for col in range(board.num_y):
+            cell = board.get_cell(Location(row, col))
+            if not cell.is_empty():
+                top_piece = cell.get_top_piece()
+                # TODO: Hard coded that AI is white and not black
+                if top_piece.color == Color.WHITE and top_piece.orientation == Orientation.HORIZONTAL:
+                    piece_score += 1
+                elif top_piece.color == Color.BLACK and top_piece.orientation == Orientation.HORIZONTAL:
+                    piece_score -= 1
 
-    return board.white_pieces_placed - board.black_pieces_placed
+    return piece_score
 
+# TODO: Also hard coded that AI is white and not black
 def center_control(board):
     """
     Calculates how many center squares the player controls. Center control criteria.
@@ -135,7 +148,7 @@ def center_control(board):
             center_score -= 1
 
     return center_score
-
+# TODO: Also hard coded that AI is white and not black
 def edge_control(board):
     """
     Calculates how many edge squares the player controls. Edge control criteria.
@@ -230,7 +243,9 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
     
     #If the depth is 0, we have reached the end of the search tree
     if depth == 0:
-        return score(board)
+        score_board = score(board)
+        #print(f'score: {score_board}')
+        return score_board
 
     if white_to_move:
         max_score = -WIN
@@ -240,11 +255,13 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
             next_moves = get_all_possible_moves(board, Color.BLACK) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
             #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
             current_score = find_move_minimax(board, next_moves, depth - 1, not white_to_move) # go into the next depth level
+            
             if current_score > max_score:
                 max_score = current_score
                 if depth == MAX_DEPTH: 
                     next_move = move
-            
+            if current_score == WIN:
+                break
             #print('board from minimax from white: ')
             #print(board)
             #print(f'turn: {board.turn}')

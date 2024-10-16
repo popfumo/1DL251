@@ -75,7 +75,7 @@ def check_game_end(board):
     game_result = check_win(board)
     if game_result == GameResult.VICTORY_BLACK or game_result == GameResult.VICTORY_WHITE:
         winner = Color.from_id(game_result.value)
-        print(board)
+        # print(board)
         print(f"{winner} wins!")
     elif game_result == GameResult.DRAW:
         print("The game is a draw.")
