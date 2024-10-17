@@ -4,6 +4,7 @@ from board import Board, Player, Color, Location, Orientation, Piece,MoveInstruc
 from interaction_functions import place_piece, make_move_ai,get_all_possible_moves, undo_move
 from game_logic import check_win
 from game import check_game_end
+import copy 
 
 class TestGameAi(unittest.TestCase):
 
@@ -75,9 +76,8 @@ class TestGameAi(unittest.TestCase):
         assert (board.black_pieces_placed == 1)
         make_move_ai(board, new_placementmove)
         assert (board.white_pieces_placed == 1)
-        #print(board.latest_move.pop())
-        #print(piece_to_place)
-        assert (board.latest_move.pop() == new_placementmove.new_placement)
+        
+        assert (board.latest_move.pop() == new_placementmove)
 
 
     def test_ai_moving_move(self):
@@ -97,7 +97,7 @@ class TestGameAi(unittest.TestCase):
         # print(piece1)
         assert(board.get_cell(Location(1, 1)).get_top_piece() == piece1)
         assert(board.get_cell(Location(1, 2)).get_top_piece() == piece2)
-        assert(board.latest_move.pop() == [piece1, piece2])
+        assert(board.latest_move.pop() == stack_move)
 
 
     def test_place_after_finding_moves(self):
@@ -111,7 +111,7 @@ class TestGameAi(unittest.TestCase):
         move: MoveInstruction = possible_moves[0]
         make_move_ai(board, move)
         assert (board.white_pieces_placed == 1)
-        assert (board.latest_move.pop() == move.new_placement)
+        assert (board.latest_move.pop() == move)
 
 
     def test_ai_undo_move(self):
@@ -124,7 +124,7 @@ class TestGameAi(unittest.TestCase):
         move: MoveInstruction = possible_moves[0]
         make_move_ai(board, move)
         assert (board.white_pieces_placed == 1)
-        assert (board.latest_move[-1] == move.new_placement)
+        assert (board.latest_move[-1] == move)
         undo_move(board)
         assert (board.white_pieces_placed == 0)
         assert (board.get_cell(Location(0, 0)).is_empty())
@@ -140,7 +140,7 @@ class TestGameAi(unittest.TestCase):
         some_move = move2[move2.__len__()-1]
         make_move_ai(board, some_move)
         assert (board.white_pieces_placed == 1)
-        assert (board.latest_move[-1] == some_move.new_placement)
+        assert (board.latest_move[-1] == some_move)
         undo_move(board)
         assert (board.white_pieces_placed == 0)
 
@@ -165,7 +165,7 @@ class TestGameAi(unittest.TestCase):
         # print(f'white pieces placed: {board.white_pieces_placed}')
 
         assert (board.white_pieces_placed == 1)
-        assert (board.latest_move.pop() == move.new_placement)
+        assert (board.latest_move.pop() == move)
 
     
     def test_check_win_path_left_to_right(self):
@@ -238,6 +238,53 @@ class TestGameAi(unittest.TestCase):
         
         assert (check_win(board) == GameResult.VICTORY_BLACK)
 
+    def test_ai_tries_to_win_snake(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+
+
+        # This is the snake path that is tested in this test
+        #  |x| | | | |
+        #  |x|x| | | |
+        #  | |x| | | |
+        #  | |x| | | |
+        #  | | | | | |
+
+        place_piece(player2.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 1), Orientation.HORIZONTAL)
+        
+        #print(board)
+        
+        all_moves = get_all_possible_moves(board, player2.color)
+        victory_found = False
+        for move in all_moves:
+            if(isinstance(move, PlacementMove)):
+                if(move == PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, player2.color))):
+                    victory_found = True                    
+                    break
+                
+        assert(victory_found == True)            
+        
+        # # temporary    
+        # make_move_ai(board, PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, player2.color)))
+        # print(board)
+        # game_result = check_game_end(board)
+        # assert (game_result == GameResult.VICTORY_WHITE)
+        
+        # return
+        move_to_make = AI_get_move(board, all_moves, 'medium')
+        #print(move_to_make)
+        make_move_ai(board, move_to_make)
+
+        #print(board)
+        game_result = check_game_end(board)
+
+        assert (game_result == GameResult.VICTORY_WHITE)
+
     def test_ai_tries_to_win(self):
         board = Board()
         player1 = Player(Color.BLACK)
@@ -279,20 +326,45 @@ class TestGameAi(unittest.TestCase):
         moves = get_all_possible_moves(board, player2.color)
         best_move = AI_get_move(board, moves, 'medium')
         make_move_ai(board, best_move)
-        print("test")
-        print(board)    
+        #print("test")
+        #print(board)    
 
-    def test_ai_is_surrounded_horizontal(self):
+    def test_undo_placement_move(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        place_piece(player1.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        board_copy = copy.deepcopy(board)
+        place_piece(player2.color, board, Location(0, 0), Orientation.HORIZONTAL)
+        undo_move(board)
+        assert(board.get_cell(Location(0,0)).get_top_piece() == board_copy.get_cell(Location(0,0)).get_top_piece())
         
-        pass
+    def test_undo_stack_move(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player1.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        
+        stack_move = StackMove([Piece(Location(1, 2), Orientation.HORIZONTAL, player1.color),
+                                Piece(Location(1, 3), Orientation.HORIZONTAL, player1.color),
+                                Piece(Location(1, 4), Orientation.HORIZONTAL, player1.color)], 
+                               Piece(Location(1, 1), Orientation.HORIZONTAL, player1.color))
+            
+        make_move_ai(board, stack_move) 
+        #print(board)
+        assert(board.get_cell(Location(1, 1)).is_empty())
+        assert(board.get_cell(Location(1, 2)).get_top_piece() == Piece(Location(1, 2), Orientation.HORIZONTAL, player1.color))
+        assert(board.get_cell(Location(1, 3)).get_top_piece() == Piece(Location(1, 3), Orientation.HORIZONTAL, player1.color))
+        assert(board.get_cell(Location(1, 4)).get_top_piece() == Piece(Location(1, 4), Orientation.HORIZONTAL, player1.color))
+        undo_move(board)
+        #print(board)
+        assert(board.get_cell(Location(1, 2)).is_empty())
+        assert(board.get_cell(Location(1, 3)).is_empty())
+        assert(board.get_cell(Location(1, 4)).is_empty())
 
-    def test_move_empty_cell(self):
-        
-        pass
-    
-    def test_ai_out_of_moves(self):
-        
-        pass
+
 
     
 if __name__ == '__main__':

@@ -117,13 +117,16 @@ class StackMove(MoveInstruction):
         self.move_type = MoveType.STACKMOVE
     def __str__(self):
         return f"StackMove: {self.stack_moves} from {self.start_cell}"
+    def __eq__(self, value):
+        return self.stack_moves == value.stack_moves and self.start_cell == value.start_cell
 
 class PlacementMove(MoveInstruction):
     def __init__(self, new_placement:Piece):
         self.new_placement: Piece = new_placement
         self.move_type = MoveType.PLACEMENTMOVE
-    def is_equal(self, loc:Location, orientation:Orientation):
-        return self.new_placement.location.x == loc.x and self.new_placement.location.y == loc.y and self.new_placement.orientation == orientation
+    def __eq__(self, value):
+        value:PlacementMove
+        return self.new_placement.location.x == value.new_placement.location.x  and self.new_placement.location.y == value.new_placement.location.y and self.new_placement.orientation == value.new_placement.orientation
     
     def __str__(self):
         return f"PlacementMove: {self.new_placement}"
@@ -155,7 +158,7 @@ class Board:
         self.black_pieces_placed = 0
 
         # Only to be used by AI
-        self.latest_move = []
+        self.latest_move: List[MoveInstruction] = []
 
     def __str__(self):
         string = ""

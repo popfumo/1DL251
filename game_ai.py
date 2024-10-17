@@ -1,6 +1,7 @@
 import random
+from typing import List
 from game_logic import find_connected_pieces, Location, Orientation, check_win
-from board import Player, Color, Board, GameResult, MoveType, StackMove, PlacementMove
+from board import Piece, Player, Color, Board, GameResult, MoveType, StackMove, PlacementMove, MoveInstruction
 from interaction_functions import get_all_possible_moves, make_move_ai, undo_move
 import copy
 
@@ -12,15 +13,9 @@ import copy
 # The AI almost always begins with a blocking piece, weird behaviour, fix score function
 #############################################################################################
 
-
+TARGET_DEPTH:int
 WIN = 10000
-
-MAX_DEPTH = 2 #this needs to be changed per difficulty but it is global for ease of development
-
-def find_best_move_thread(board, valid_moves):
-    global next_move
-    next_move = None
-    find_best_move(board, valid_moves)
+MAX_DEPTH = 2
 
 def set_difficulty():
     """
@@ -49,18 +44,18 @@ def AI_get_move(board,valid_moves, difficulty):
         return random.choice(valid_moves)
     
     elif difficulty == "medium":
-        #thread = threading.Thread(target=find_best_move_thread, args=(board, validMoves))
-        
-        #thread.start()
-        
-        #thread.join()
-
+        TARGET_DEPTH = 1
+        depth = 1
+        #next_move = find_best_move(board_copy, valid_moves,depth, None)
         find_best_move(board_copy, valid_moves)
         
         return next_move
+        
     
     elif difficulty == "hard":
-
+        TARGET_DEPTH = 2
+        depth = 2
+        #next_move = find_best_move(board_copy, valid_moves,depth, None)        
         find_best_move(board_copy, valid_moves)
 
         return next_move
@@ -70,7 +65,6 @@ def AI_get_move(board,valid_moves, difficulty):
 #   NOTE: when scoring, WHITE wants to maximize,#
 #   BLACK wants to minimize                     #
 #################################################
-
 def longest_road(board):
     """
     Finds and returns the length of the longest road (horizontal or vertical connection).
@@ -81,6 +75,7 @@ def longest_road(board):
     Returns:
     The length of the longest road (int).
     """
+    
     longest_road_score = 0
     for row in range(board.num_x):
         for col in range(board.num_y):
@@ -190,9 +185,10 @@ def score(board):
     board_score = 0
 
     game_result = check_win(board)
-    if game_result == GameResult.VICTORY_BLACK:
+    
+    if game_result == GameResult.VICTORY_BLACK:        
         return -WIN
-    elif game_result == GameResult.VICTORY_WHITE:
+    elif game_result == GameResult.VICTORY_WHITE:        
         return WIN
  
     
@@ -216,13 +212,43 @@ def score(board):
     weight_center_control = 3
     weight_edge_control = 1
 
-    # Calculate the score for the player
+    #Calculate the score for the player
     board_score = (player_longest_road * weight_longest_road) + \
                    (player_flat_stones * weight_flat_stones) + \
                    (the_center_control * weight_center_control) + \
                    (the_edge_control * weight_edge_control)
 
     return board_score
+
+
+
+# def find_best_move(board: Board, valid_moves: List[MoveInstruction], depth:int, best_move_found:MoveInstruction):
+    
+#     if depth == 0:
+#         score_board = score(board)
+#         #print(f'score: {score_board}')
+#         return score_board
+    
+#     max_score:int 
+#     if board.turn == Color.white: 
+#         max_score = -WIN 
+#     else: 
+#         max_score = WIN
+
+#     for move in valid_moves: 
+#         make_move_ai(board, move)
+#         next_moves = get_all_possible_moves(board, Color.BLACK)
+#         current_score = find_best_move(board, next_moves, depth - 1,best_move_found) # go into the next depth level
+
+#         if (board.turn == Color.white and current_score > max_score) or (board.turn == Color.black and current_score < max_score):
+#             max_score = current_score
+#             if depth == TARGET_DEPTH: 
+#                 best_move_found = move        
+#         undo_move(board)
+#         return max_score
+        
+#     return best_move_found    
+
 
 #TODO: FIX THE TODO IN FIND_MOVE_MINIMAX
 #helper function, it purpose is to make the initial call to the recursive function find_move_minimax and then return the result
@@ -235,13 +261,13 @@ def find_best_move(board, valid_moves):
     return next_move
 
 #recursive function that finds the best move for the player
-def find_move_minimax(board, valid_moves, depth, white_to_move):    
-
+def find_move_minimax(board, valid_moves, depth, white_to_move):        
+    
     ##print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
-    #If the depth is 0, we have reached the end of the search tree
+    #If the depth is 0, we have reached the end of the search tree    
     if depth == 0:
         score_board = score(board)
         #print(f'score: {score_board}')
@@ -250,7 +276,10 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
     if white_to_move:
         max_score = -WIN
 
-        for move in valid_moves:
+        for move in valid_moves: 
+            if isinstance(move, PlacementMove):
+                if move == PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, Color.WHITE)):
+                    print('found the move')
             make_move_ai(board, move)
             next_moves = get_all_possible_moves(board, Color.BLACK) #TODO THIS TAKES IN A PLAYER OBJECT, NOT A COLOR OBJECT, BUT WE WANT TO FIND ALL MOVES FOR THE WHITE
             #want to find all possible moves based on color cuz we need both our moves and the opponents moves thus taking in only a player is not enough and taking in boath a player and opponent seams execcive
@@ -260,8 +289,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 max_score = current_score
                 if depth == MAX_DEPTH: 
                     next_move = move
-            if current_score == WIN:
-                break
+
             #print('board from minimax from white: ')
             #print(board)
             #print(f'turn: {board.turn}')
@@ -275,6 +303,8 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
             make_move_ai(board, move)
             next_moves = get_all_possible_moves(board, Color.WHITE)
             current_score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
+            if current_score == WIN:
+                return current_score
             if current_score < min_score:
                 min_score = current_score
                 if depth == MAX_DEPTH:
@@ -285,29 +315,3 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
             #print(f'turn: {board.turn}')
             undo_move(board)
         return min_score
-
-def find_move_pruning(board, valid_moves, depth, alpha, beta, turn_multiplier):
-    global next_move
-    next_move = None
-
-    if depth == 0:
-        return score(board) * turn_multiplier
-    
-    #TODO: move ordering is important, cuz we wont have to evaluate abd moves if we find a better one. maybe moves with high longest road score should be evaluated first?
-    max_score = -WIN
-    for moves in valid_moves: # go through my moves
-        board = moves #do a move 
-        next_moves = get_all_possible_moves(board, board.turn) # get my opponents moves
-        #reverse alphpa and beta, cuz for the opponent everything is reversed
-        current_score = -find_move_pruning(board, next_moves, depth - 1,-beta, -alpha, -turn_multiplier)#turn_multiplier is negative because we want to find the maximum score based on whoes turn it is
-        if current_score > max_score:
-            max_score = current_score
-            if depth == MAX_DEPTH:
-                next_move = moves
-
-        if max_score > alpha: #pruning
-            alpha = max_score
-        if alpha >= beta:
-            break
-
-    return max_score

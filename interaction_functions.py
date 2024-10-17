@@ -25,7 +25,8 @@ def place_piece(player_color:Color, board, location, orientation):
         else:
             board.black_pieces_placed += 1
         #print(f"Piece placed at {location} with color {player.color}")  # Debug print
-        board.latest_move.append(new_piece)
+        move_instruction = PlacementMove(new_piece)
+        board.latest_move.append(move_instruction)
         board.turn = board.turn.opposite()
         return True
     else:
@@ -136,18 +137,15 @@ def circle_condtion(player, board, location):
 #if valid_move is a list it is a move instruction, otherwise it is a place instruction
 def make_move_ai(board: Board, move_to_make: MoveInstruction):
     if isinstance(move_to_make, StackMove): # It is a stack move instruction
-        inst = []
-
+        #inst = []
         start_piece = move_to_make.start_cell
-    
         for piece in move_to_make.stack_moves:
             board.get_cell(piece.location).pieces.insert(0, piece)
-            inst.append(piece)
-            board.get_cell(start_piece.location).remove_bottom_piece() 
+            #inst.append(piece)
+            board.get_cell(start_piece.location).remove_bottom_piece()         
         
-        board.latest_move.append(inst)
         board.turn = board.turn.opposite()
-        
+        board.latest_move.append(move_to_make)
         return True
     
     else: # It is a place instruction
@@ -270,18 +268,24 @@ def aux_get_all_psm(board: Board, loc: Location, colors_of_pieces_to_move: list,
 def undo_move(board: Board):
     #print(f'undo turn, current turn: {board.turn}')
     instruction = board.latest_move.pop()
-
-    if isinstance(instruction, list): #if it is a list it is a move instruction
-        for i in range(len(instruction)):
-            piece:Piece = instruction[i]
+    if isinstance(instruction, StackMove): #if it is a list it is a move instruction
+        instruction: StackMove
+        start_piece = instruction.start_cell
+        for i in range(len(instruction.stack_moves)):
+            piece:Piece = instruction.stack_moves[i]
+            # print(f'removing piece: {piece.location}')
             board.get_cell(piece.location).remove_top_piece()
+            # print(f'inserting piece: {start_piece.location}')
+            board.get_cell(start_piece.location).pieces.insert(0, piece)
             #print(f"Undoing move: {piece.location}")
 
         return True 
-    else: #otherwise it is a place instruction
-        piece:Piece = instruction
+    else: #otherwise it is a placementmove        
+        instruction: PlacementMove
+        piece:Piece = instruction.new_placement        
         board.get_cell(piece.location).remove_top_piece()
         color = piece.color
+        # print(f"color: {color}")
         if color == Color.WHITE:
             board.white_pieces_placed -= 1
         else:    
