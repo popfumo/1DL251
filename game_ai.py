@@ -1,6 +1,6 @@
 import random
 from typing import List
-from game_logic import find_connected_pieces, Location, Orientation, check_win
+from game_logic import Location, Orientation, check_win
 from board import Piece, Player, Color, Board, GameResult, MoveType, StackMove, PlacementMove, MoveInstruction
 from interaction_functions import get_all_possible_moves, make_move_ai, undo_move
 import copy
@@ -13,9 +13,7 @@ import copy
 # The AI almost always begins with a blocking piece, weird behaviour, fix score function
 #############################################################################################
 
-TARGET_DEPTH:int
 WIN = 10000
-MAX_DEPTH = 2
 
 def set_difficulty():
     """
@@ -37,6 +35,7 @@ def set_difficulty():
 # Function for AI to choose its move based on the difficulty
 # Makes a copy of the board, so dont spam this function
 def AI_get_move(board,valid_moves, difficulty):
+    global MAX_DEPTH
     
     board_copy = copy.deepcopy(board)
     if difficulty == "easy":
@@ -44,8 +43,7 @@ def AI_get_move(board,valid_moves, difficulty):
         return random.choice(valid_moves)
     
     elif difficulty == "medium":
-        TARGET_DEPTH = 1
-        depth = 1
+        MAX_DEPTH = 1
         #next_move = find_best_move(board_copy, valid_moves,depth, None)
         find_best_move(board_copy, valid_moves)
         
@@ -53,9 +51,7 @@ def AI_get_move(board,valid_moves, difficulty):
         
     
     elif difficulty == "hard":
-        TARGET_DEPTH = 2
-        depth = 2
-        #next_move = find_best_move(board_copy, valid_moves,depth, None)        
+        MAX_DEPTH = 2      
         find_best_move(board_copy, valid_moves)
 
         return next_move
@@ -66,36 +62,153 @@ def AI_get_move(board,valid_moves, difficulty):
 #   BLACK wants to minimize                     #
 #################################################
 def longest_road(board):
-    """
-    Finds and returns the length of the longest road (horizontal or vertical connection).
+    white_longest = 0
+    black_longest = 0
 
-    Args:
-    board: The game board (Board instance).
+    for x in range(board.num_x):
+        for y in range(board.num_y):
+            loc = Location(x, y)
+            cell = board.get_cell(loc)
+            top_piece = cell.get_top_piece()
+            if top_piece and top_piece.orientation == Orientation.HORIZONTAL:
+                if top_piece.color == Color.WHITE:
+                    paths_found = []
+                    visited = set()
+                    recursive_move_list = [loc]
+                    aux_find_longest_path(
+                        board,
+                        visited,
+                        top_piece,
+                        paths_found,
+                        recursive_move_list,
+                        Color.WHITE
+                    )
+                    if paths_found:
+                        longest_path = max(paths_found, key=len)
+                        path_length = len(longest_path)
+                        if path_length > white_longest:
+                            white_longest = path_length
+                elif top_piece.color == Color.BLACK:
+                    paths_found = []
+                    visited = set()
+                    recursive_move_list = [loc]
+                    aux_find_longest_path(
+                        board,
+                        visited,
+                        top_piece,
+                        paths_found,
+                        recursive_move_list,
+                        Color.BLACK
+                    )
+                    if paths_found:
+                        longest_path = max(paths_found, key=len)
+                        path_length = len(longest_path)
+                        if path_length > black_longest:
+                            black_longest = path_length
 
-    Returns:
-    The length of the longest road (int).
-    """
+    if white_longest > black_longest:
+        return white_longest
+    elif black_longest > white_longest:
+        return -black_longest
+    else:
+        return 0
+
+def no_where_to_go(board: Board, piece: Piece, visited: set):
+    loc = piece.location
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        new_x, new_y = loc.x + dx, loc.y + dy
+        if 0 <= new_x < board.num_x and 0 <= new_y < board.num_y:
+            new_loc = Location(new_x, new_y)
+            if new_loc not in visited:
+                cell = board.get_cell(new_loc)
+                if not cell.is_empty():
+                    top_piece = cell.get_top_piece()
+                    if (
+                        top_piece.color == piece.color
+                        and top_piece.orientation == Orientation.HORIZONTAL
+                    ):
+                        return False
+    return True
+
+def aux_find_longest_path(
+    board: Board,
+    visited: set,
+    piece: Piece,
+    paths_found: List[List[Location]],
+    recursive_move_list: List[Location],
+    color: Color
+):
+    loc = piece.location
+
+    if loc in visited:
+        return
+
+    visited.add(loc)
+
+    # Assume no more moves until we find one
+    no_more_moves = True
+
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        new_x, new_y = loc.x + dx, loc.y + dy
+        if 0 <= new_x < board.num_x and 0 <= new_y < board.num_y:
+            new_loc = Location(new_x, new_y)
+            if new_loc not in visited:
+                cell = board.get_cell(new_loc)
+                if not cell.is_empty():
+                    top_piece = cell.get_top_piece()
+                    if (
+                        top_piece.color == color
+                        and top_piece.orientation == Orientation.HORIZONTAL
+                    ):
+                        no_more_moves = False
+                        recursive_move_list.append(new_loc)
+                        aux_find_longest_path(
+                            board,
+                            visited,
+                            top_piece,
+                            paths_found,
+                            recursive_move_list,
+                            color
+                        )
+                        recursive_move_list.pop()
+
+    if no_more_moves:
+        paths_found.append(recursive_move_list.copy())
+
+    visited.remove(loc)
+
+
+
+
+
+# def longest_road(board):
+#     """
+#     Finds and returns the length of the longest road (horizontal or vertical connection).
+
+#     Args:
+#     board: The game board (Board instance).
+
+#     Returns:
+#     The length of the longest road (int).
+#     """
     
-    longest_road_score = 0
-    for row in range(board.num_x):
-        for col in range(board.num_y):
-            cell = board.get_cell(Location(row, col))
-            if not cell.is_empty():
-                top_piece = cell.get_top_piece()
-                if top_piece.color == Color.WHITE and top_piece.orientation == Orientation.HORIZONTAL:
-                    connected = find_connected_pieces(board, Color.WHITE,Location(row, col))
-                    if len(connected) > 0 and len(connected) > longest_road_score:
-                        longest_road_score = len(connected)
-                elif top_piece.color == Color.BLACK and top_piece.orientation == Orientation.HORIZONTAL:
-                    connected = find_connected_pieces(board, Color.BLACK,Location(row, col))
-                    if len(connected) > 0 and len(connected) > longest_road_score:
-                        longest_road_score = -len(connected)
+#     longest_road_score = 0
+#     for row in range(board.num_x):
+#         for col in range(board.num_y):
+#             cell = board.get_cell(Location(row, col))
+#             if not cell.is_empty():
+#                 top_piece = cell.get_top_piece()
+#                 if top_piece.color == Color.WHITE and top_piece.orientation == Orientation.HORIZONTAL:
+#                     connected = find_connected_pieces(board, Color.WHITE,Location(row, col))
+#                     if len(connected) > 0 and len(connected) > longest_road_score:
+#                         longest_road_score = len(connected)
+#                 elif top_piece.color == Color.BLACK and top_piece.orientation == Orientation.HORIZONTAL:
+#                     connected = find_connected_pieces(board, Color.BLACK,Location(row, col))
+#                     if len(connected) > 0 and len(connected) > longest_road_score:
+#                         longest_road_score = -len(connected)
 
-    return longest_road_score
+#     return longest_road_score
 
-#Number of adjecent squares where the player can extend their road
-def potential_road_extensions(board, player):
-    return 0
 
 def flat_stone_diff(board:Board):
     """
@@ -219,37 +332,7 @@ def score(board):
                    (the_edge_control * weight_edge_control)
 
     return board_score
-
-
-
-# def find_best_move(board: Board, valid_moves: List[MoveInstruction], depth:int, best_move_found:MoveInstruction):
-    
-#     if depth == 0:
-#         score_board = score(board)
-#         #print(f'score: {score_board}')
-#         return score_board
-    
-#     max_score:int 
-#     if board.turn == Color.white: 
-#         max_score = -WIN 
-#     else: 
-#         max_score = WIN
-
-#     for move in valid_moves: 
-#         make_move_ai(board, move)
-#         next_moves = get_all_possible_moves(board, Color.BLACK)
-#         current_score = find_best_move(board, next_moves, depth - 1,best_move_found) # go into the next depth level
-
-#         if (board.turn == Color.white and current_score > max_score) or (board.turn == Color.black and current_score < max_score):
-#             max_score = current_score
-#             if depth == TARGET_DEPTH: 
-#                 best_move_found = move        
-#         undo_move(board)
-#         return max_score
-        
-#     return best_move_found    
-
-
+ 
 #TODO: FIX THE TODO IN FIND_MOVE_MINIMAX
 #helper function, it purpose is to make the initial call to the recursive function find_move_minimax and then return the result
 def find_best_move(board, valid_moves):
@@ -303,6 +386,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
             make_move_ai(board, move)
             next_moves = get_all_possible_moves(board, Color.WHITE)
             current_score = find_move_minimax(board, next_moves, depth - 1, white_to_move)
+            
             if current_score == WIN:
                 return current_score
             if current_score < min_score:
@@ -310,8 +394,5 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 if depth == MAX_DEPTH:
                     next_move = move
 
-            #print('bord in minimax from black: ')
-            #print(board)
-            #print(f'turn: {board.turn}')
             undo_move(board)
         return min_score

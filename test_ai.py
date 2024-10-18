@@ -268,12 +268,7 @@ class TestGameAi(unittest.TestCase):
                     break
                 
         assert(victory_found == True)            
-        
-        # # temporary    
-        # make_move_ai(board, PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, player2.color)))
-        # print(board)
-        # game_result = check_game_end(board)
-        # assert (game_result == GameResult.VICTORY_WHITE)
+    
         
         # return
         move_to_make = AI_get_move(board, all_moves, 'medium')
