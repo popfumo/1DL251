@@ -1,8 +1,8 @@
-from board import Board, Player, Color, Location, Orientation, GameResult
+from board import Board, Player, Color, Location, Orientation, GameResult, Piece
 from interaction_functions import place_piece, move_piece, unload_cell, unload_piece_recursive, get_all_possible_moves, make_move_ai, check_unload
 from game_logic import check_win
 from game_ai import set_difficulty, AI_get_move
-
+import copy
 '''
 Init:
 1. Load board and players
@@ -33,11 +33,11 @@ def game():
 
         # Execute the move
         if move['type'] == 'place':
-            success = place_piece(player1, board, move['location'], move['orientation'])
+            success = place_piece(player1.color, board, move['location'], move['orientation'])
         elif move['type'] == 'move':
-            success = move_piece(player1, board, move['old_location'], move['new_location'])
+            success = move_piece(player1.color, board, move['old_location'], move['new_location'])
         elif move['type'] == 'unload':
-            success = unload_piece_recursive(player1, board, move['num_remove'], move['old_location'], move['old_location'])
+            success = unload_piece_recursive(player1.color, board, move['num_remove'], move['old_location'], move['old_location'])
 
         # Check if the move was successful
         if not success:
@@ -59,7 +59,7 @@ def game():
         # Switch to the other player ( the AI )
         possible_moves = get_all_possible_moves(board, player2.color)
         the_best_move = AI_get_move(board, possible_moves, difficulty)
-        # print(f'Best move: {the_best_move}')
+        print(f'Best move: {the_best_move}')
 
         make_move_ai(board, the_best_move)
 
@@ -72,7 +72,8 @@ def game():
         print("end of Game Loop")
 
 def check_game_end(board):
-    game_result = check_win(board)
+    bcopy = copy.deepcopy(board)
+    game_result = check_win(bcopy)
     if game_result == GameResult.VICTORY_BLACK or game_result == GameResult.VICTORY_WHITE:
         winner = Color.from_id(game_result.value)
         # print(board)

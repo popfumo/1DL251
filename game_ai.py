@@ -250,7 +250,7 @@ def center_control(board):
 
     for x, y in center_squares:
         cell = board.get_cell(Location(x, y))
-        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
+        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE: #and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
             center_score += 1
         elif not cell.is_empty() and cell.get_top_piece().color == Color.BLACK:
             center_score -= 1
@@ -272,7 +272,7 @@ def edge_control(board):
     edge_score = 0
     for x, y in edges:
         cell = board.get_cell(Location(x, y))
-        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
+        if not cell.is_empty() and cell.get_top_piece().color == Color.WHITE: #and cell.get_top_piece().orientation == Orientation.HORIZONTAL:
             edge_score += 1
         elif not cell.is_empty() and cell.get_top_piece().color == Color.BLACK:
             edge_score -= 1
@@ -353,10 +353,10 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
     if depth == 0:
         score_board = score(board)
         return score_board
-
+    
     if white_to_move:
         max_score = -WIN
-
+        
         for move in valid_moves: 
             if isinstance(move, PlacementMove):
                 if move == PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, Color.WHITE)):

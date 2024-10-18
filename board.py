@@ -91,7 +91,7 @@ class Piece:
         self.orientation = orientation
         self.color = color
     def __repr__(self):
-        return f"{self.location} {self.orientation}"
+        return f"{self.location} {self.orientation} {self.color}"
     
     def __eq__(self, other):
         if isinstance(other, Piece):

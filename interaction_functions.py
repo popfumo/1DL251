@@ -217,7 +217,7 @@ def get_all_possible__stack_moves(board:Board, player_color,start_location: Loca
     colors_of_pieces_to_move = []
     copy_start_cell = copy.deepcopy(start_cell)
     for i in range(num_pieces_to_move):
-        piece_to_move = copy_start_cell.remove_top_piece()
+        piece_to_move = copy_start_cell.remove_bottom_piece()
         colors_of_pieces_to_move.append(piece_to_move.color)
 
     assert len(colors_of_pieces_to_move) == num_pieces_to_move
