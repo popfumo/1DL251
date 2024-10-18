@@ -346,14 +346,12 @@ def find_best_move(board, valid_moves):
 #recursive function that finds the best move for the player
 def find_move_minimax(board, valid_moves, depth, white_to_move):        
     
-    ##print(f'valid moves: {valid_moves}')
 
     global next_move #Needs to be global, cuz it is used in the recursive function
     
     #If the depth is 0, we have reached the end of the search tree    
     if depth == 0:
         score_board = score(board)
-        #print(f'score: {score_board}')
         return score_board
 
     if white_to_move:
@@ -373,9 +371,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
                 if depth == MAX_DEPTH: 
                     next_move = move
 
-            #print('board from minimax from white: ')
-            #print(board)
-            #print(f'turn: {board.turn}')
+
             undo_move(board)
         return max_score
 
