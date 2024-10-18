@@ -360,7 +360,35 @@ class TestGameAi(unittest.TestCase):
         assert(board.get_cell(Location(1, 4)).is_empty())
 
 
-
+    def test_too_many_placed(self):
+        board = Board()
+        player1 = Player(Color.BLACK)
+        player2 = Player(Color.WHITE)
+        place_piece(player2.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 2), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 2), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 2), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(3, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 2), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 3), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(1, 1), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 0), Orientation.HORIZONTAL)
+        place_piece(player2.color, board, Location(2, 1), Orientation.HORIZONTAL)
+        hmm = get_all_possible_moves(board, player2.color)
+        no_place_move = all(not isinstance(item, PlacementMove) for item in hmm)
+        assert(no_place_move)
     
 if __name__ == '__main__':
     unittest.main()

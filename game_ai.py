@@ -322,8 +322,8 @@ def score(board):
     # Weights for each criterion (adjust these values as needed)
     weight_longest_road = 5
     weight_flat_stones = 2
-    weight_center_control = 3
-    weight_edge_control = 1
+    weight_center_control = 0
+    weight_edge_control = 0
 
     #Calculate the score for the player
     board_score = (player_longest_road * weight_longest_road) + \
@@ -356,7 +356,7 @@ def find_move_minimax(board, valid_moves, depth, white_to_move):
     
     if white_to_move:
         max_score = -WIN
-        
+
         for move in valid_moves: 
             if isinstance(move, PlacementMove):
                 if move == PlacementMove(Piece(Location(4, 1), Orientation.HORIZONTAL, Color.WHITE)):

@@ -174,7 +174,7 @@ def get_all_possible_moves(board : Board, player_color: Color):
             
             # Add all possible boards that can be created after placing a new piece.
             # If the cell is empty or has a horizontal piece on top, we can place a piece
-            if cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL: 
+            if (cell.is_empty() or cell.get_top_piece().orientation == Orientation.HORIZONTAL) and board.white_pieces_placed < 21: 
 
                 new_horizontal_move = Piece(Location(row, col), Orientation.HORIZONTAL, player_color)
                 new_horizontal_instruction = PlacementMove(new_horizontal_move)
